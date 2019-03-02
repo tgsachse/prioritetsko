@@ -1,0 +1,103 @@
+%%% use 10pt options with the asme2ej format
+\documentclass[10pt]{asme2ej}
+\title{Adaptive Priority Queue With Elimination and Combining}
+
+%%% first author
+\author{Christopher L. Taliaferro
+    \affiliation{
+	Undergraduate\\
+	Department of Computer Science\\
+	University of Central Florida\\
+    Email: taliaferrodev@gmail.com
+    }	
+}
+
+%%% second author
+\author {Tiger Sachse
+    \affiliation{
+	Undergraduate\\
+	Department of Computer Science\\
+	University of Central Florida\\
+    Email: tgsachse@gmail.com
+    }	
+}
+
+%%% third author
+\author{Ben Faria
+    \affiliation{
+	Undergraduate\\
+	Department of Computer Science\\
+	University of Central Florida\\
+    Email: benFaria@knights.ucf.edu
+    }	
+}
+
+%%% fourth author
+\author{Harrison W. Black
+    \affiliation{
+	Undergraduate\\
+	Department of Computer Science\\
+	University of Central Florida\\
+    Email: harrison.w.black@knights.ucf.edu
+    }	
+}
+
+\begin{document}
+
+\maketitle    
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Priority queues are fundamental abstract data structures,
+often used to manage limited resources in parallel programming. Several
+proposed parallel priority queue implementations are based on skiplists,
+harnessing the potential for parallelism of the add() operations. In addition, methods such as Flat Combining have been proposed to reduce
+contention, batching together multiple operations to be executed by a
+single thread. While this technique can decrease lock-switching overhead
+and the number of pointer changes required by the removeMin() operations in the priority queue, it can also create a sequential bottleneck and
+limit parallelism, especially for non-conflicting add() operations.
+In this paper, we describe a novel priority queue design, harnessing
+the scalability of parallel insertions in conjunction with the efficiency
+of batched removals. Moreover, we present a new elimination algorithm
+suitable for a priority queue, which further increases concurrency on
+balanced workloads with similar numbers of add() and removeMin()
+operations. We implement and evaluate our design using a variety of
+techniques including locking, atomic operations, hardware transactional
+memory, as well as employing adaptive heuristics given the workload.
+\cite{latex}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Linearizability}
+
+In this section we shall discuss the linearizability of our proposed method
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Skiplist}
+
+When implementing the Skiplist version of the priority queue, linearization occurs when an element is added to the parallel section of the skiplist, with addParallel(T). When this element is added, compare and swap is invoked and the bucket for key T has its counter incremented, evoking linearization. If a thread inserts a new minimum value into our priority queue and the sequential part of the skiplist is empty, the thread then performs the required action of updating the queue’s minValue. If the sequential part of the list contains data, then the main thread synchronously updates minValue without linearization. Threads that succeed changing minValue linearize their operation at the point of the successful compare and swap. Some operations require the head of the list to be modified. The operations moveHead() and chopHead() execute while holding a lock. Linearization effectively occurs when the lock is released with lock.release().
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Elimination}
+
+Each thread, either adding or removing, that finds the inverse operation in the elimination array must verify that the exchanged value is smaller than minValue. If so, the thread can compare and swap the elimination slot, exchanging arguments with the waiting thread. It is possible that the priority queue minimum value is changed by a concurrent add(). In that case, the linearization point for both threads engaged in elimination is at the point where the value was observed to be smaller than the priority queue minimum. The threads post their operation in the elimination array and wait for the main thread to process it. The main thread first marks the operation as in progress by compare and swapping ‘in progress´ into the slot. It then performs the sequential operation on the skiplist and writes the results back in the slot, releasing the waiting thread. The waiting thread observes the new value and returns it. The linearization point of the operation happens during the sequential operation on the skiplist.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Evaluation}
+
+The author of the paper evaluated their results using the following benchmark. A thread randomly flips a coin with probability p to be an add() and 1 – p removeMin(). The tests began after inserting 2000 elements into the priority queue. Our priority queue algorithm is designed for high contention scenarios, in which elimination and combining thrive. Therefore, it can incur a penalty at lower thread counts. Although, our priority queue can fully take advantage of both elimination and parallel adds, so it maintains peak performance over other algorithms such as the flat combining skiplist, the flat combining pairing heap, the lock free skiplist, and the lazy skiplist at higher thread counts.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Here's where you specify the bibliography style file.
+% The full file name for the bibliography style file 
+% used for an ASME paper is asmems4.bst.
+\bibliographystyle{asmems4}
+
+% Here's where you specify the bibliography database file.
+% The full file name of the bibliography database for this
+% article is asme2e.bib. The name for your database is up
+% to you.
+\bibliography{asme2e}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
