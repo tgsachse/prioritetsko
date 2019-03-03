@@ -12,9 +12,15 @@ MAIN_CLASS="PrioritetskoDriver"
 
 # Build the program in a build folder.
 build_program() {
-    rm -rf $BUILD_DIR
-    mkdir $BUILD_DIR
-    javac "$SOURCE_DIR/$PACKAGE_NAME"/* -d "$BUILD_DIR"
+    rm -rf "$BUILD_DIR"
+    mkdir "$BUILD_DIR"
+    javac "$SOURCE_DIR/$PACKAGE_NAME"/* -d "$BUILD_DIR" "$@"
+    if [ $? -ne 0 ]; then
+        echo "Build process failed."
+        rm -rf "$BUILD_DIR"
+
+        return 1
+    fi
 }
 
 # Run the compiled program.
@@ -31,6 +37,9 @@ run_program() {
 # Package the program into a jar.
 package_program() {
     build_program
+    if [ $? ne 0 ]; then
+        exit 1
+    fi
     mkdir -p "$DIST_DIR" "$BUILD_DIR/$DOCS_JAR_DIR" "$BUILD_DIR/$SOURCE_DIR"
 
     # Copy documentation and source files into the build directory, and create
@@ -57,7 +66,7 @@ cleanup() {
 # Main entry point to the program.
 case $1 in
     --build|-b)
-        build_program
+        build_program "${@:2}"
         ;;
     --run|-r)
         run_program "${@:2}"
