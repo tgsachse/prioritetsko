@@ -14,13 +14,14 @@ public class SequentialPriorityQueue<E extends Comparable<E>> {
         elements = new ArrayList<E>();
     }
 
-    /*
-    public SequentialPriorityQueue(Comparator comparator) {
+    // Create a new priority queue with a collection of elements.
+    public SequentialPriorityQueue(Collection<? extends E> collection) {
+        elements = new ArrayList<E>();
+
+        for (E element : collection) {
+            insert(element);
+        }
     }
-    */
-
-    //public SequentialPriorityQueue(Elements to enqueue)
-
 
     // Add an element to the priority queue.
     public void insert(E element) {
@@ -29,6 +30,13 @@ public class SequentialPriorityQueue<E extends Comparable<E>> {
         // percolated up to its appropriate position.
         elements.add(element);
         percolateElementUp(getMaxIndex());
+    }
+
+    // Add a collection of elements to the priority queue.
+    public void insert(Collection<? extends E> collection) {
+        for (E element : collection) {
+            insert(element);
+        }
     }
 
     // Get and remove the element at the front of the priority queue.
@@ -68,9 +76,12 @@ public class SequentialPriorityQueue<E extends Comparable<E>> {
         }
     }
 
+    // Check if the priority queue is empty.
+    public boolean isEmpty() {
+        return elements.isEmpty();
+    }
 
     // Get a string representation of this priority queue.
-    @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -83,9 +94,14 @@ public class SequentialPriorityQueue<E extends Comparable<E>> {
         return stringBuilder.toString();
     }
 
-    // Check if the priority queue is empty.
-    public boolean isEmpty() {
-        return elements.isEmpty();
+    // Clear out the priority queue.
+    public void clear() {
+        elements.clear();
+    }
+
+    // Get the size of the priority queue.
+    public int size() {
+        return elements.size();
     }
 
     // Get a parent's left child's index.
