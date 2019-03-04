@@ -3,8 +3,8 @@ prioritetsko
 This project provides an adaptive, concurrent priority queue with elimination and combining.
 
 development
----
-This repository contains a script, ``Prioritetsko.sh`` that automates many development functions you may wish to perform. Here's a full list of flags that the script understands.
+----
+This repository contains a script, ``Prioritetsko.sh`` that automates many development functions you might wish to perform. Here is a full list of flags that the script accepts.
 
 ``-b, --build <build arguments...>``
   Build the software into the ``Build`` directory.
@@ -16,3 +16,22 @@ This repository contains a script, ``Prioritetsko.sh`` that automates many devel
   Package the software into a ``jar`` archive.
 ``-c, --clean``
   Clean up leftover files.
+
+examples
+----
+Here are some example commands to get you started.
+::
+  # Build the project.
+  bash Prioritetsko.sh --build
+  
+  # Run the project with no arguments.
+  bash Prioritetsko.sh --run
+  
+  # Run the project with two integer arguments.
+  bash Prioritetsko.sh --run 42 9001
+  
+  # Build the project and run it with a floating point argument.
+  bash Prioritetsko.sh --bar 3.1415926
+  
+  # Package the project.
+  bash Prioritetsko.sh --pack
