@@ -28,7 +28,7 @@
 	Undergraduate\\
 	Department of Computer Science\\
 	University of Central Florida\\
-    Email: benFaria@knights.ucf.edu
+    Email: benfaria96@gmail.edu
     }	
 }
 
@@ -49,23 +49,24 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Priority queues are fundamental abstract data structures,
-often used to manage limited resources in parallel programming. Several
-proposed parallel priority queue implementations are based on skiplists,
-harnessing the potential for parallelism of the add() operations. In addition, methods such as Flat Combining have been proposed to reduce
-contention, batching together multiple operations to be executed by a
-single thread. While this technique can decrease lock-switching overhead
-and the number of pointer changes required by the removeMin() operations in the priority queue, it can also create a sequential bottleneck and
-limit parallelism, especially for non-conflicting add() operations.
-In this paper, we describe a novel priority queue design, harnessing
-the scalability of parallel insertions in conjunction with the efficiency
-of batched removals. Moreover, we present a new elimination algorithm
-suitable for a priority queue, which further increases concurrency on
-balanced workloads with similar numbers of add() and removeMin()
-operations. We implement and evaluate our design using a variety of
-techniques including locking, atomic operations, hardware transactional
-memory, as well as employing adaptive heuristics given the workload.
-\cite{latex}
+Priority queues are fundamental abstract data structures which can be implemented in a parallel fashion to assist in discrete event simulations and resource management \cite{latex}. Some of the current implementations of these parallel priority queues utilize heaps or skiplists to create the foundation, or main data structure to build these more abstract concurrent data structures. The skiplist implementation gives the ability to take advantage of the “potential for parallelism of the add method” \cite{latex}. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Prior Implementations}
+One skiplist-based implementation of the concurrent priority queue acts in a similar way to the “LazyList” and “LockFreeList” we have seen in the textbook, when a node is to be deleted it will be marked as such and then the thread will attempt to physically remove it, this implementation comes from Lotan and Shavit \cite{latex}. Another implementation of this concurrent priority queue comes from Hendler et al, this implementation introduced Flat Combining which batches together several operations and hand the batch to one thread to handle the execution of these operations \cite{latex}. This has also been taken and mixed in with a client server structure, where several client thread will create these operations to be handed off to a single server thread to then execute them. All these previous implementations have been steps in the right direction but they all have their flaws, the first implementation from Lotan and Shavit have the possibility of running into limited scalability when high thread counts are introduced due to contention on shared memory access. While the Flat Combining implementation reduces contention of the shared memory it introduces its own problem, which is the potential for the server thread to become a sequential bottleneck \cite{latex}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Implementation with Elimination}
+The implementations and their downsides lead to the implementation that is introduced and discussed in this paper, this being an implementation which uses a skiplist-based priority queue which employs an elimination algorithm. The skip list is used in this implementation because of its ability to provide both “operations-batching and disjoint-access parallelism.” \cite{latex}. As mentioned, part of this utilized the technique of batched operations from the Flat Combining implementation to improve the performance of the overall concurrent priority queue. As values are added into the priority queue they are subject to one of two paths, either the value is “small enough” to participate in elimination or it is too large and must be added into the skiplist normally. The second option mentioned is where the parallel portion of this data structure acts, high-values adds can be executed in parallel \cite{latex}. These two different paths that arise from adding to the skip list bring up the need for splitting the skip list into two different parts, being the sequential part handled by the server thread, and the parallel part \cite{latex}. The other side of this data structure comes from the remove min method which is where the batched operations comes into play, these “requests can be batched and executed by a server thread using the combining/delegation paradigm.” \cite{latex}. Designing the concurrent priority queue in this fashion allows for the reduction of contention and use of parallelism through elimination and high-valued adds \cite{latex}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Interacting with Priority Queue}	
+As mentioned, the design of this concurrent priority queue is based on an underlying skip list which is split into two parts, sequential and parallel, these two parts are both complete skip lists. The priority queue supports both the remove min method and the add method, the sequential part of the skip list will serve the remove min requests as well as the low-valued add requests which are more likely to be removed soon, while the parallel part will cater to the large-valued adds which are less likely to be removed in the near future \cite{latex}. Early the two paths that can be taken on an add request were touched on, but now they will be broken down further. When a priority queue add request is made two things happen, first the value is determined to be either less than or greater than the last value in the sequential list and from there it is passed on to its next step based on the condition it meets. If it is less than the last value the priority queue will attempt a remove min request using the elimination array which will be discussed further soon, otherwise if it is greater than the last value it will be sent to be added to the parallel list, which in turn means it will be added in parallel with any other values that met this same condition. As mentioned the add request of small values will in turn cause the thread to attempt to execute a remove min request that may exist in the elimination array. If there is no such request in the array, then the add request itself gets added to the elimination array. It will then wait in the elimination array until it either eliminates or times out, the server thread will sequentially execute any operations that fail to eliminate \cite{latex}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Underlying Skiplist}
+The sequential part of the skiplist uses a move head method to bring in elements form the parallel part when it becomes empty, it can also use a chop head method to relink the sequential and parallel portions in the case that there haven’t been remove min requests for some time \cite{latex}. These methods allow for the underlying skiplist to adjust based on the current state of the priority queue, either bringing in more elements from the parallel portion or linking with the parallel portion to perform more efficient parallel add requests. Anytime these move head and chop head methods are called the currSeq and lastSeq pointers are adjusted to represent the start and end to the new sequential part of the list thus allowing for the priority queue add and remove min requests to react to those changes. The parallel part of the list uses a “Single-Writer Multi-Readers lock” to ensure that and priority queue add requests are not operating on buckets that are being moved to the sequential part by the move head method or interferes with the chop head method \cite{latex}. A skip list find method is used to determine whether any head operations have been executed and if the find method comes back clean a lock is held to avoid any head operations that take place after the clean find. This lock will then be released once a CAS fails while inserting a new value.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Elimination}
+Now, with a better understanding of the structure and functionality if the underlying skiplist and its parts, the next major aspect of this concurrent priority queue is its elimination algorithm. In this priority queue, a remove min request can always be eliminated but if an add request finds its way into the elimination array it can only be eliminated if its value is less than or equal to the lowest value of the sequential portion of the list. The algorithm works by using an elimination array in which elements are added to the array and a remove min request searches through the “array until it finds a request to eliminate with or it finds an empty slot in the array” \cite{latex}. Once it finds one of these two things it will execute a CAS to get the value it needs to return, or it will fall through to the sequential part of the list and perform a remove and return that value. There are cases where an add request can never be eliminated if its value never goes below the lowest value in the priority queue. This is where the sequential server thread comes into play, it collects add and remove requests that fail to eliminate and executes them sequentially on the skiplist \cite{latex}. This functionality is key to the reduced contention of this concurrent priority queue.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Linearizability}
 
@@ -86,6 +87,14 @@ Each thread, either adding or removing, that finds the inverse operation in the 
 \section{Evaluation}
 
 The author of the paper evaluated their results using the following benchmark. A thread randomly flips a coin with probability p to be an add() and 1 – p removeMin(). The tests began after inserting 2000 elements into the priority queue. Our priority queue algorithm is designed for high contention scenarios, in which elimination and combining thrive. Therefore, it can incur a penalty at lower thread counts. Although, our priority queue can fully take advantage of both elimination and parallel adds, so it maintains peak performance over other algorithms such as the flat combining skiplist, the flat combining pairing heap, the lock free skiplist, and the lazy skiplist at higher thread counts.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hardware Transactions}
+
+Regarding physical hardware transactions and the Adaptive Priority Queue, parallel threads are permitted speculatively execute critical sections. However, if two threads encounter a data conflict, one must roll back and re-execute its critical section. Results were evaluated using a Core i7-4770, running at 3.4GHz, with restricted transactional memory (RTM), and Hyperthreading enabled. Additionally, 8gb of RAM was shared and each core had 32KB of L1 cache\cite{latex}. 
+\linebreak
+\linebreak
+\indent The sequential and parallel skiplists both use the Single-Write-Multi-Readers lock to synchronize. This causes complications with the priority queue as this lock adds a lot of overhead. Since the problem was approached by making all operations transactional, this lead to too many aborts occurring with this implementation. This was resolved by having the server increment a timestamp any time a head-moving operation like moveHead() or chopHead() starts or ends. Two operations are used to read a timestamp and then find the corresponding insertion. If a head-moving operation occurs after starting the transaction, the timestamp will change, causing the transaction to be aborted due to a timestamp conflict. For the timestamp to be valid the find() operation must record all predecessors and successors of a new bucket at each position i in preds[i] and succs[i]. If the bucket already exists, then the counter inside the transaction is incremented and the operation completes. The more threads running, the more increase in the number of transactions per successful operations. Additionally, the percentage of threads that need more than 10 tries to succeed also increases with the amount of threads running. After ten tries, threads stop attempting the transaction path and the server completes it for them. The amount of times this happens is at most 10% of the time but is generally less than 2%.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Here's where you specify the bibliography style file.
