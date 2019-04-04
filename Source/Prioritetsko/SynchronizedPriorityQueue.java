@@ -1,4 +1,4 @@
-// A sequential (single-threaded) priority queue from scratch.
+// A synchronized (coarse-grained locking) priority queue from scratch.
 // Written by Tiger Sachse.
 
 package Prioritetsko;
@@ -8,17 +8,17 @@ import java.lang.Comparable;
 import java.util.Collection;
 import java.util.Collections;
 
-// Provides a single-threaded, generic priority queue.
-public class SequentialPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
+// Provides a synchronized, generic priority queue.
+public class SynchronizedPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
     private ArrayList<E> elements;
 
     // Create a new, empty priority queue.
-    public SequentialPriorityQueue() {
+    public SynchronizedPriorityQueue() {
         elements = new ArrayList<E>();
     }
 
     // Create a new priority queue with a collection of elements.
-    public SequentialPriorityQueue(Collection<? extends E> collection) {
+    public SynchronizedPriorityQueue(Collection<? extends E> collection) {
         elements = new ArrayList<E>();
 
         for (E element : collection) {
@@ -28,7 +28,7 @@ public class SequentialPriorityQueue<E extends Comparable<E>> implements Priorit
 
     @Override
     // Add an element to the priority queue.
-    public void insert(E element) {
+    public synchronized void insert(E element) {
 
         // The element is added to the end of the elements list and then is
         // percolated up to its appropriate position.
@@ -37,7 +37,7 @@ public class SequentialPriorityQueue<E extends Comparable<E>> implements Priorit
     }
 
     // Add a collection of elements to the priority queue.
-    public void insert(Collection<? extends E> collection) {
+    public synchronized void insert(Collection<? extends E> collection) {
         for (E element : collection) {
             insert(element);
         }
@@ -45,7 +45,7 @@ public class SequentialPriorityQueue<E extends Comparable<E>> implements Priorit
 
     @Override
     // Get and remove the element at the front of the priority queue.
-    public E retrieve() throws EmptyQueueException {
+    public synchronized E retrieve() throws EmptyQueueException {
 
         // Attempt to retrieve the front element. If the queue is empty, throw
         // an exception.
@@ -72,7 +72,7 @@ public class SequentialPriorityQueue<E extends Comparable<E>> implements Priorit
     }
 
     // Get the element at the front of the priority queue.
-    public E peek() throws EmptyQueueException {
+    public synchronized E peek() throws EmptyQueueException {
         try {
             return elements.get(0);
         }
@@ -82,12 +82,12 @@ public class SequentialPriorityQueue<E extends Comparable<E>> implements Priorit
     }
 
     // Check if the priority queue is empty.
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return elements.isEmpty();
     }
 
     // Get a string representation of this priority queue.
-    public String toString() {
+    public synchronized String toString() {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (int elementIndex = 1; elementIndex < (getMaxIndex()); elementIndex++) {
@@ -100,12 +100,12 @@ public class SequentialPriorityQueue<E extends Comparable<E>> implements Priorit
     }
 
     // Clear out the priority queue.
-    public void clear() {
+    public synchronized void clear() {
         elements.clear();
     }
 
     // Get the size of the priority queue.
-    public int size() {
+    public synchronized int size() {
         return elements.size();
     }
 

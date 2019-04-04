@@ -5,7 +5,7 @@ package Prioritetsko;
 
 public class PrioritetskoDriver {
     public static void main(String[] args) {
-        SequentialPriorityQueue<Integer> queue = new SequentialPriorityQueue<Integer>();
+        SynchronizedPriorityQueue<Integer> queue = new SynchronizedPriorityQueue<Integer>();
 
         queue.insert(new Integer(10));
         queue.insert(new Integer(30));
