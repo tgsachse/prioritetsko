@@ -20,6 +20,7 @@ public class PrioritetskoDriver {
         queue.insert(new Integer(10000));
 
 
+        /*
         System.out.println(queue);
         while (!queue.isEmpty()) {
             try {
@@ -29,6 +30,6 @@ public class PrioritetskoDriver {
             catch (EmptyQueueException exception) {
                 break;
             }
-        }
+        }*/
     }
 }

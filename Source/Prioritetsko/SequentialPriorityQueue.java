@@ -3,10 +3,13 @@
 
 package Prioritetsko;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.lang.Comparable;
+import java.util.Collection;
+import java.util.Collections;
 
 // Provides a single-threaded, generic priority queue.
-public class SequentialPriorityQueue<E extends Comparable<E>> {
+public class SequentialPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
     private ArrayList<E> elements;
 
     // Create a new, empty priority queue.
@@ -23,6 +26,7 @@ public class SequentialPriorityQueue<E extends Comparable<E>> {
         }
     }
 
+    @Override
     // Add an element to the priority queue.
     public void insert(E element) {
 
@@ -39,6 +43,7 @@ public class SequentialPriorityQueue<E extends Comparable<E>> {
         }
     }
 
+    @Override
     // Get and remove the element at the front of the priority queue.
     public E retrieve() throws EmptyQueueException {
 
