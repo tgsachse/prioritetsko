@@ -45,6 +45,11 @@ build_and_run_program() {
     run_program "$@"
 }
 
+# Build and run the program, then pipe results to a graphing script.
+analyze_program() {
+    build_and_run_program "$@" | tee /dev/tty | python3 "$GRAPHER_SCRIPT"
+}
+
 # Package the program into a jar.
 package_program() {
     build_program
@@ -66,11 +71,6 @@ package_program() {
     cd .. 1>/dev/null 2>&1
 
     cleanup
-}
-
-# Build and run the program, then pipe results to a graphing script.
-analyze_program() {
-    build_and_run_program "$@" | tee /dev/tty | python3 "$GRAPHER_SCRIPT"
 }
 
 # Clean up any mess.
@@ -97,13 +97,13 @@ case "$COMMAND" in
     --bar)
         build_and_run_program "$@"
         ;;
+    --analyze|-a)
+        analyze_program "$@"
+        ;;
     --pack|-p)
         package_program
         ;;
     --clean|-c)
         cleanup
-        ;;
-    --analyze|-a)
-        analyze_program "$@"
         ;;
 esac

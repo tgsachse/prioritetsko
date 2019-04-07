@@ -2,6 +2,12 @@ prioritetsko
 ----
 This project provides an adaptive, concurrent priority queue with elimination and combining.
 
+execution
+----
+This program is provided as a jar, and can be executed as shown below. The arguments in <arrow brackets> are required. The argument in [normal brackets] is optional.
+::
+    java -jar PrioritetskoTester <totalThreads> <totalPushes> <totalPops> [totalRuns]
+
 development
 ----
 This repository contains a script, ``Develop.sh`` that automates many development functions you might wish to perform. Here is a full list of flags that the script accepts.
@@ -12,6 +18,8 @@ This repository contains a script, ``Develop.sh`` that automates many developmen
   Run the software you just built.
 ``--bar <runtime arguments...>``
   Build the software and then automatically run it afterwards.
+``-a, --analyze <runtime arguments...>``
+  Build and run the software, then graph the results.
 ``-p, --pack``
   Package the software into a ``jar`` archive.
 ``-c, --clean``
@@ -19,19 +27,19 @@ This repository contains a script, ``Develop.sh`` that automates many developmen
 
 examples
 ----
-Here are some example commands to get you started.
+Here are some development example commands to get you started.
 ::
   # Build the project.
-  bash Develop.sh --build
+  sh Develop.sh --build
   
-  # Run the project with no arguments.
-  bash Develop.sh --run
+  # Run the project across 32 threads, with 1000 total pushes and 2000 total pops.
+  sh Develop.sh --run 32 1000 2000
   
-  # Run the project with two integer arguments.
-  bash Develop.sh --run 42 9001
+  # Build the project and run it with the same parameters as above and 20 runs per thread.
+  sh Develop.sh --bar 32 1000 2000 20
   
-  # Build the project and run it with a floating point argument.
-  bash Develop.sh --bar 3.1415926
-  
+  # Produce a results graph for 16 threads, with 200 total pushes and 100 total pops.
+  sh Develop.sh --analyze 16 200 100
+
   # Package the project.
-  bash Develop.sh --pack
+  sh Develop.sh --pack
