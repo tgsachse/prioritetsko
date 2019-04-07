@@ -7,6 +7,7 @@ DIST_DIR="Dist"
 BUILD_DIR="Build"
 SOURCE_DIR="Source"
 MANIFEST="manifest.txt"
+GRAPHER_SCRIPT="Grapher.py"
 PACKAGE_NAME="Prioritetsko"
 DOCS_JAR_DIR="Documentation"
 MAIN_CLASS="PrioritetskoTester"
@@ -33,6 +34,20 @@ run_program() {
     fi
     java "$PACKAGE_NAME.$MAIN_CLASS" "$@"
     cd .. 1>/dev/null 2>&1
+}
+
+# Build and run the program.
+build_and_run_program() {
+    build_program
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+    run_program "$@"
+}
+
+# Build and run the program, then pipe results to a graphing script.
+analyze_program() {
+    build_and_run_program "$@" | tee /dev/tty | python3 "$GRAPHER_SCRIPT"
 }
 
 # Package the program into a jar.
@@ -69,7 +84,6 @@ if [ $# -lt 1 ]; then
     printf "No argument provided. Check the README for arguments.\n"
     exit 1
 fi
-
 COMMAND="$1"
 shift
 
@@ -81,8 +95,10 @@ case "$COMMAND" in
         run_program "$@"
         ;;
     --bar)
-        build_program
-        run_program "$@"
+        build_and_run_program "$@"
+        ;;
+    --analyze|-a)
+        analyze_program "$@"
         ;;
     --pack|-p)
         package_program
