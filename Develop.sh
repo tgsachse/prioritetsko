@@ -1,3 +1,4 @@
+#!/bin/sh
 # Some useful development functions for this repository!
 # Written by Tiger Sachse.
 
@@ -16,7 +17,7 @@ build_program() {
     mkdir "$BUILD_DIR"
     javac "$SOURCE_DIR/$PACKAGE_NAME"/* -d "$BUILD_DIR" "$@"
     if [ $? -ne 0 ]; then
-        echo "Build process failed."
+        printf "Build process failed.\n"
         rm -rf "$BUILD_DIR"
 
         return 1
@@ -25,13 +26,13 @@ build_program() {
 
 # Run the compiled program.
 run_program() {
-    cd "$BUILD_DIR" &> /dev/null
+    cd "$BUILD_DIR" 1>/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo "Please build the program first using --build."
+        printf "Please build the program first using --build.\n"
         exit 1
     fi
     java "$PACKAGE_NAME.$MAIN_CLASS" "$@"
-    cd .. &> /dev/null
+    cd .. 1>/dev/null 2>&1
 }
 
 # Package the program into a jar.
@@ -47,12 +48,12 @@ package_program() {
     find "$DOCS_DIR"/* -type f \( -name "*.txt" -o -name "*.pdf" \) \
         -exec cp {} "$BUILD_DIR/$DOCS_JAR_DIR" \;
     cp -r "$SOURCE_DIR/$PACKAGE_NAME"/* "$BUILD_DIR/$SOURCE_DIR"
-    echo "Main-Class: $PACKAGE_NAME.$MAIN_CLASS" > "$MANIFEST"
+    printf "Main-Class: $PACKAGE_NAME.$MAIN_CLASS\n" > "$MANIFEST"
 
     # Create a jar with the contents of the build directory.
-    cd $BUILD_DIR
+    cd "$BUILD_DIR"
     jar cvfm "../$DIST_DIR/$PACKAGE_NAME.jar" "../$MANIFEST" *
-    cd .. &> /dev/null
+    cd .. 1>/dev/null 2>&1
 
     cleanup
 }
@@ -64,16 +65,24 @@ cleanup() {
 }
 
 # Main entry point to the program.
-case $1 in
+if [ $# -lt 1 ]; then
+    printf "No argument provided. Check the README for arguments.\n"
+    exit 1
+fi
+
+COMMAND="$1"
+shift
+
+case "$COMMAND" in
     --build|-b)
-        build_program "${@:2}"
+        build_program "$@"
         ;;
     --run|-r)
-        run_program "${@:2}"
+        run_program "$@"
         ;;
     --bar)
         build_program
-        run_program "${@:2}"
+        run_program "$@"
         ;;
     --pack|-p)
         package_program
