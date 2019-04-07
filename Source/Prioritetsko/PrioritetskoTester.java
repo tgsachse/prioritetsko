@@ -1,4 +1,6 @@
-// Main driver program that tests all provided queues in this package.
+// Tests a variety of synchronized priority queue implementations and output the
+// results to stdout. This program is executed like so:
+//     $ java PrioritetskoTester <totalThreads> <totalPushes> <totalPops> [totalRuns]
 // Written by Tiger Sachse.
 
 package Prioritetsko;
@@ -6,20 +8,23 @@ package Prioritetsko;
 import java.util.Stack;
 import java.util.Random;
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 
-// ./program threads totalPushes totalPops [runs]
-// ./program 32 10000 10000 50
-
-public class PrioritetskoDriver {
+// Test a variety of synchronized priority queues.
+public class PrioritetskoTester {
     private static final int DEFAULT_RUNS = 50;
 
-    public static void main(String[] argumentVector) throws InterruptedException {
-        Arguments arguments = parseArguments(argumentVector);
+    // Main entry point to this program.
+    public static void main(String[] argumentsVector) throws InterruptedException {
+        
+        // Parse the command line arguments and create an arraylist of queues for testing.
+        Arguments arguments = parseArguments(argumentsVector);
         ArrayList<PriorityQueue<Integer>> queues = new ArrayList<PriorityQueue<Integer>>();
         queues.add(new SynchronizedPriorityQueue<Integer>());
         queues.add(new SynchronizedPriorityQueue<Integer>());
         queues.add(new SynchronizedPriorityQueue<Integer>());
         
+        // Run tests on each queue and save the results in an array.
         for (PriorityQueue<Integer> queue : queues) {
             double[] results = runTests(
                 arguments.totalRuns,
@@ -28,37 +33,42 @@ public class PrioritetskoDriver {
                 arguments.totalPops,
                 queue
             );
+
             //printResults(results);
         }
     }
 
-    private static Arguments parseArguments(String[] argumentVector) {
+    // Parse the command line arguments.
+    private static Arguments parseArguments(String[] argumentsVector) {
         Arguments arguments = new Arguments();
 
-        if (argumentVector.length < 3) {
+        // Ensure that enough arguments are present.
+        if (argumentsVector.length < 3) {
             System.err.println(
                 "Arguments: <totalThreads> <totalPushes> <totalPops> [totalRuns]"
             );
             System.exit(1);
         }
 
+        // Parse out the first three integers.
         arguments.totalThreads = 0;
         arguments.totalPushes = 0;
         arguments.totalPops = 0;
         try {
-            arguments.totalThreads = Integer.parseInt(argumentVector[0]);
-            arguments.totalPushes = Integer.parseInt(argumentVector[1]);
-            arguments.totalPops = Integer.parseInt(argumentVector[2]);
+            arguments.totalThreads = Integer.parseInt(argumentsVector[0]);
+            arguments.totalPushes = Integer.parseInt(argumentsVector[1]);
+            arguments.totalPops = Integer.parseInt(argumentsVector[2]);
         }
         catch (NumberFormatException exception) {
             System.err.println("Your arguments must all be integers.");
             System.exit(2);
         }
 
+        // If a fourth integer is given, overwrite the default totalRuns value.
         arguments.totalRuns = DEFAULT_RUNS;
-        if (argumentVector.length > 3) {
+        if (argumentsVector.length > 3) {
             try {
-                arguments.totalRuns = Integer.parseInt(argumentVector[3]);
+                arguments.totalRuns = Integer.parseInt(argumentsVector[3]);
             }
             catch (NumberFormatException exception) {
                 System.err.println("The number of runs must be an integer.");
@@ -66,6 +76,7 @@ public class PrioritetskoDriver {
             }
         }
 
+        // Ensure that all integers are positive.
         if (arguments.totalThreads < 1
             || arguments.totalPushes < 1
             || arguments.totalPops < 1
@@ -78,6 +89,7 @@ public class PrioritetskoDriver {
         return arguments;
     }
 
+    // Run tests on a given queue with a range of threads.
     private static double[] runTests(
         int totalRuns,
         int totalThreads,
@@ -85,9 +97,11 @@ public class PrioritetskoDriver {
         int totalPops,
         PriorityQueue<Integer> queue) throws InterruptedException {
 
+        // For each run and for each thread count, run a test with that thread
+        // count on the provided queue and save the results into an array.
         double[] results = new double[totalThreads];
         for (int runID = 0; runID < totalRuns; runID++) {
-            for (int threadID = 0; threadID < results.length; threadID++) {
+            for (int threadID = 0; threadID < totalThreads; threadID++) {
                 results[threadID] += runTest(
                     threadID + 1,
                     totalPushes,
@@ -97,6 +111,7 @@ public class PrioritetskoDriver {
             }
         }
 
+        // Get the average for each thread count.
         for (int threadID = 0; threadID < results.length; threadID++) {
             results[threadID] /= totalRuns;
         }
@@ -104,6 +119,7 @@ public class PrioritetskoDriver {
         return results;
     }
     
+    // Push to and pop from a given queue a specific number of times.
     private static double runTest(
         int totalThreads,
         int totalPushes,
@@ -112,7 +128,7 @@ public class PrioritetskoDriver {
 
         // Allocate an appropriate number of threads for this test.
         Thread[] threads = new Thread[totalThreads];
-        for (int threadID = 0; threadID < threads.length; threadID++) {
+        for (int threadID = 0; threadID < totalThreads; threadID++) {
             threads[threadID] = new Thread(
                 new QueueManipulator(
                     totalPops,
@@ -132,18 +148,12 @@ public class PrioritetskoDriver {
         }
         long stopTime = System.nanoTime();
 
-        // Return the results of this test in milliseconds.
+        // Return the execution time of this test in milliseconds.
         return ((double) (stopTime - startTime)) / 1000000;
     }
 }
 
-class Arguments {
-    public int totalThreads;
-    public int totalPushes;
-    public int totalPops;
-    public int totalRuns;
-}
-
+// A runnable class that pushes to and pops from a queue a specific number of times.
 class QueueManipulator implements Runnable {
     private Random random;
     private int totalPops;
@@ -151,6 +161,7 @@ class QueueManipulator implements Runnable {
     private Stack<Integer> integerStack;
     private PriorityQueue<Integer> queue;
 
+    // Initialize this manipulator with a queue and some push and pop targets.
     public QueueManipulator(
         int totalPops,
         int totalPushes,
@@ -160,14 +171,18 @@ class QueueManipulator implements Runnable {
         this.totalPops = totalPops;
         this.totalPushes = totalPushes;
 
+        // Create a stack of random numbers. These are preallocated to prevent
+        // allocation time from polluting the performance of the stack during
+        // testing.
         random = new Random();
         integerStack = new Stack<Integer>();
         for (int count = 0; count < totalPushes; count++) { 
-            integerStack.add(random.nextInt());
+            integerStack.add(new Integer(random.nextInt()));
         }
     }
 
     @Override
+    // Push to and pop from a queue a specific number of times.
     public void run() {
         int remainingPushes = totalPushes;
         int remainingPops = totalPops;
@@ -176,7 +191,11 @@ class QueueManipulator implements Runnable {
         while (remainingPushes > 0 || remainingPops > 0) {
             boolean executePush = (random.nextFloat() > odds);
             if (executePush) {
-                queue.insert(integerStack.pop());
+                try {
+                    queue.insert(integerStack.pop());
+                }
+                catch (EmptyStackException exception) {
+                }
                 remainingPushes--;
             }
             else {
@@ -190,3 +209,12 @@ class QueueManipulator implements Runnable {
         }
     }
 }
+
+// A structure that holds command line arguments.
+class Arguments {
+    public int totalThreads;
+    public int totalPushes;
+    public int totalPops;
+    public int totalRuns;
+}
+

@@ -8,7 +8,7 @@ SOURCE_DIR="Source"
 MANIFEST="manifest.txt"
 PACKAGE_NAME="Prioritetsko"
 DOCS_JAR_DIR="Documentation"
-MAIN_CLASS="PrioritetskoDriver"
+MAIN_CLASS="PrioritetskoTester"
 
 # Build the program in a build folder.
 build_program() {
@@ -30,7 +30,7 @@ run_program() {
         echo "Please build the program first using --build."
         exit 1
     fi
-    java "$PACKAGE_NAME.$MAIN_CLASS"
+    java "$PACKAGE_NAME.$MAIN_CLASS" "$@"
     cd .. &> /dev/null
 }
 
