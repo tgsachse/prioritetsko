@@ -34,7 +34,7 @@ public class PrioritetskoTester {
                 queue
             );
 
-            //printResults(results);
+            printResults(queue, results);
         }
     }
 
@@ -148,8 +148,24 @@ public class PrioritetskoTester {
         }
         long stopTime = System.nanoTime();
 
-        // Return the execution time of this test in milliseconds.
-        return ((double) (stopTime - startTime)) / 1000000;
+        // Return the execution time of this test (per thread) in milliseconds.
+        return ((double) (stopTime - startTime)) / 1000000 / totalThreads;
+    }
+
+    // Print results for a queue's tests.
+    private static void printResults(PriorityQueue<Integer> queue, double[] results) {
+        System.out.printf(
+            "Execution time per thread for the %s:\n",
+            queue.getClass().getSimpleName()
+        );
+
+        for (int threadID = 0; threadID < results.length; threadID++) {
+            System.out.printf(
+                "Threads: %2d | Milliseconds: %f\n",
+                threadID + 1,
+                results[threadID]
+            );
+        }
     }
 }
 
@@ -217,4 +233,3 @@ class Arguments {
     public int totalPops;
     public int totalRuns;
 }
-
