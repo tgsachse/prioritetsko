@@ -4,7 +4,7 @@ This project provides an adaptive, concurrent priority queue with elimination an
 
 development
 ----
-This repository contains a script, ``Prioritetsko.sh`` that automates many development functions you might wish to perform. Here is a full list of flags that the script accepts.
+This repository contains a script, ``Develop.sh`` that automates many development functions you might wish to perform. Here is a full list of flags that the script accepts.
 
 ``-b, --build <build arguments...>``
   Build the software into the ``Build`` directory.
@@ -22,16 +22,16 @@ examples
 Here are some example commands to get you started.
 ::
   # Build the project.
-  bash Prioritetsko.sh --build
+  bash Develop.sh --build
   
   # Run the project with no arguments.
-  bash Prioritetsko.sh --run
+  bash Develop.sh --run
   
   # Run the project with two integer arguments.
-  bash Prioritetsko.sh --run 42 9001
+  bash Develop.sh --run 42 9001
   
   # Build the project and run it with a floating point argument.
-  bash Prioritetsko.sh --bar 3.1415926
+  bash Develop.sh --bar 3.1415926
   
   # Package the project.
-  bash Prioritetsko.sh --pack
+  bash Develop.sh --pack
