@@ -16,6 +16,7 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
     }
 
     public E retrieve() throws EmptyQueueException {
-        
+        E retrievedElement = null;
+        return retrievedElement;        
     }
 }

@@ -1,12 +1,7 @@
-// Ben Faria, be030243
-// COP 3503, Fall 2017
-// **************
-// SkipList.java
-// **************
-// This program builds the Skip List data structure by creating all of the methodolgy 
-// and by performing all of the data management that a Skip List should do.  This Skip List class 
-// is Generic allowing it to store any data type that implements Comparable.  Becasue of how the 
-// Skip List stores it's data it perfroms Insertion, Deletion, and accessing a node in O(log n) time. 
+// Skip List Implementation used by Priority Queue
+// Written by Ben Faria
+
+package Prioritetsko;
 
 import java.io.*;
 import java.util.*;
