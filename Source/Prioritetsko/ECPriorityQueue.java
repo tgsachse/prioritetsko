@@ -3,21 +3,13 @@
 
 package Prioritetsko;
 
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.atomic.*;
 
-class Element<E extends Comparable<E>> {
-    public E value;
-    public int status;
-
-    public Element(E value, int status) {
-        this.value = value;
-        this.status = status;
-    }
-}
-
 public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
-    private SkipList skipList;
-    private AtomicReference<Element>[] elimination;
+    private ArrayList<E> elimination;
+    private Random priotity;
 
     // Server thread that handles elimination array operations
     private Server serverThread;
@@ -26,14 +18,11 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
     private final int eliminationArraySize = 100;
 
     public ECPriorityQueue () {
-        // Initialize a new skiplist
-        skipList = new SkipList<>();
         // Initialize elimination array
-        elimination = new AtomicReference[eliminationArraySize];
+        elimination = new ArrayList<>();
 
-        for(int i = 0; i < eliminationArraySize; i++){
-            elimination[i] = new AtomicReference<Element>();
-        }
+        // Random number to assign to new elements
+        priotity = new Random();
 
         // Initialize and begin server thread
         serverThread = new Server();
