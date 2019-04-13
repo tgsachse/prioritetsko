@@ -7,16 +7,21 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
-    public ArrayList<E> elimination;
-    public Random priotity;
+    private ArrayList<Element> elimination;
+    private Random priotity;
+    private Heap pQueue; 
 
     // Server thread that handles elimination array operations
     private Server serverThread;
 
-    // Fixed Values
-    private final int eliminationArraySize = 100;
+    private final int WAITING = 0;
+    private final int REMOVE = 1;
+    private final int INSERT = 2;
 
     public ECPriorityQueue () {
+        // Initialize our priority queue
+        pQueue = new Heap<>(); 
+
         // Initialize elimination array
         elimination = new ArrayList<>();
 
@@ -30,14 +35,25 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
 
     // Add element into our priority queue
     public void insert(E element) {
-        Element inserting = new Element(element, 1, priotity.nextInt());
-        
+        Element<E> inserting = new Element<>(element, WAITING, priotity.nextInt());
+
+        if (pQueue.insert(inserting)) {
+            return;
+        } else {
+            elimination.add(inserting);
+        }
     }
 
     // Removes minimum priority element from priority queue
     public E retrieve() throws EmptyQueueException {
-        E retrievedElement = null;
-        return retrievedElement;        
+        Element<E> retVal;
+
+        try {
+            retVal = pQueue.removeMin();
+            return retVal.value;
+        } catch (EmptyQueueException exception) {
+            System.out.println("Queue is empty!");
+        }        
     }
 
     // Server thread that constantly checks elimination array for 
@@ -48,12 +64,17 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
         public Server() {
             run = true;
         }
+        
         public void run(){
             while (run)
-                for(int i = 0; i < eliminationArraySize; i++) {
-                    // TODO: Case where we must remove from the elimination array
-
-                    // TODO: Case where we must add to skiplist
+                for(Element object: elimination) {
+                    if (object.status == REMOVE)
+                        elimination.remove(object);
+                    
+                    else if (object.status == INSERT){
+                        if (pQueue.insert(object))
+                            elimination.remove(object);
+                    }
                 }
         }
     }
