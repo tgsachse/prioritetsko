@@ -5,11 +5,10 @@ package Prioritetsko;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.atomic.*;
 
 public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
-    private ArrayList<E> elimination;
-    private Random priotity;
+    public ArrayList<E> elimination;
+    public Random priotity;
 
     // Server thread that handles elimination array operations
     private Server serverThread;
@@ -31,7 +30,8 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
 
     // Add element into our priority queue
     public void insert(E element) {
-
+        Element inserting = new Element(element, 1, priotity.nextInt());
+        
     }
 
     // Removes minimum priority element from priority queue
