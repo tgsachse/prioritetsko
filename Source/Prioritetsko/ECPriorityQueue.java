@@ -1,20 +1,21 @@
 // Adaptive Priority Queue with Elimination and Combining.
-// Written by Christopher Taliaferro & Ben Faria
+// Written by Christopher Taliaferro
 
 package Prioritetsko;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
     private ArrayList<Element> elimination;
     private Random priotity;
     private Heap pQueue; 
+    private AtomicBoolean lock;
 
     // Server thread that handles elimination array operations
     private Server serverThread;
 
-    private final int WAITING = 0;
     private final int REMOVE = 1;
     private final int INSERT = 2;
 
@@ -28,6 +29,8 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
         // Random number to assign to new elements
         priotity = new Random();
 
+        lock = new AtomicBoolean();
+
         // Initialize and begin server thread
         serverThread = new Server();
         serverThread.start();
@@ -35,7 +38,12 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
 
     // Add element into our priority queue
     public void insert(E element) {
-        Element<E> inserting = new Element<>(element, WAITING, priotity.nextInt());
+        Element<E> inserting = new Element<>(element, INSERT, priotity.nextInt());
+
+        if (inserting.priority < pQueue.getMin().priority) {
+            elimination.add(inserting);
+            return;
+        }
 
         if (pQueue.insert(inserting)) {
             return;
@@ -47,6 +55,16 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
     // Removes minimum priority element from priority queue
     public E retrieve() throws EmptyQueueException {
         Element<E> retVal;
+
+        while (lock.compareAndSet(false, true)) {}
+        for(Element object: elimination) {
+            if (object.priority < pQueue.getMin().priority && object.status == INSERT) {
+                retVal = elimination.get(elimination.indexOf(object));
+                elimination.get(elimination.indexOf(object)).status = REMOVE;
+                return retVal;
+            }
+        }
+        lock.getAndSet(false);
 
         try {
             retVal = pQueue.removeMin();
