@@ -22,8 +22,8 @@ public class Heap
         ArrayList<Element> updatedHeap = currentHeap;
 
         // Insert element into currentHeap
-        updatedHeap.push(e);
-        updatedHeap = percolateUp(updatedHeap, idx);
+        updatedHeap.add(e);
+        updatedHeap = percolateUp(updatedHeap, updatedHeap.size() - 1);
 
         return minHeap.compareAndSet(updatedHeap, updatedHeap);
     }
@@ -32,14 +32,16 @@ public class Heap
     public Element removeMin()
     {
         ArrayList<Element> currentHeap;
+        ArrayList<Element> updatedHeap;
+        Element min;
 
         // Continue until successful
         do
         {
             currentHeap = minHeap.get();
-            ArrayList<Element> updatedHeap = currentHeap;
+            updatedHeap = currentHeap;
 
-            Element min = updatedHeap.get(0);
+            min = updatedHeap.get(0);
             updatedHeap.set(0, updatedHeap.remove(updatedHeap.size()));
             updatedHeap = percolateDown(updatedHeap, 0);
         } while (!minHeap.compareAndSet(currentHeap, updatedHeap));
@@ -82,20 +84,22 @@ public class Heap
     // Percolate Elementdown through minheap
     private ArrayList<Element> percolateDown(ArrayList<Element> heap, int idx)
     {
-        int child = getMinChild(heap, idx);
+        Element child = getMinChild(heap, idx);
+        int childIdx = heap.indexOf(child);
 
-        while (heap.get(child).priority < heap.get(idx).priority)
+        while (child.priority < heap.get(idx).priority)
         {
-            heap = swap(heap, idx, child);
-            idx = child;
+            heap = swap(heap, idx, childIdx);
+            idx = childIdx;
             child = getMinChild(heap, idx);
+            childIdx = heap.indexOf(child);
         }
 
         // Make sure that any duplicate priorities are stored in left child
-        if (leftOrRight(idx, child))
+        if (leftOrRight(idx, childIdx))
         {
-            if (heap.get(idx).priority == heap.get(child).priority)
-                heap = swap(heap, child, child-1);
+            if (heap.get(idx).priority == child.priority)
+                heap = swap(heap, childIdx, childIdx-1);
         }
         
         return heap;
