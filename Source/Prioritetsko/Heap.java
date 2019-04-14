@@ -6,7 +6,7 @@ package Prioritetsko;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Heap<Element>
+public class Heap
 {
     private AtomicReference<ArrayList<Element>> minHeap;
 
