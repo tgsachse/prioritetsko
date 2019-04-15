@@ -19,13 +19,13 @@ public class Heap
     public boolean insert(Element e)
     {
         ArrayList<Element> currentHeap = minHeap.get();
-        ArrayList<Element> updatedHeap = currentHeap;
+        ArrayList<Element> updatedHeap = new ArrayList<Element>(currentHeap);
 
         // Insert element into currentHeap
         updatedHeap.add(e);
         updatedHeap = percolateUp(updatedHeap, updatedHeap.size() - 1);
 
-        return minHeap.compareAndSet(updatedHeap, updatedHeap);
+        return minHeap.compareAndSet(currentHeap, updatedHeap);
     }
 
     // Remove min Element by priority from minheap
@@ -39,9 +39,9 @@ public class Heap
         do
         {
             currentHeap = minHeap.get();
-            updatedHeap = currentHeap;
+            updatedHeap = new ArrayList<Element>(currentHeap);
 
-            if (currentHeap.size() == 0)
+            if (currentHeap.size() <= 0 )
                 return null;
 
             min = updatedHeap.get(0);
@@ -60,7 +60,7 @@ public class Heap
     {
         ArrayList<Element> currentHeap = minHeap.get();
 
-        if (currentHeap.size() == 0)
+        if (currentHeap.size() <= 0)
             return null;
 
         return currentHeap.get(0);
@@ -72,7 +72,7 @@ public class Heap
         int parent = 0;
         
         // Move element up in minheap based on priority level
-        if (idx != 0)
+        if (idx > 0)
         {
             parent = (idx - 1)/2;
             if (heap.get(idx).priority < heap.get(parent).priority)

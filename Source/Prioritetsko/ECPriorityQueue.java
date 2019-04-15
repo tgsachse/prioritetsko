@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
-    private ArrayList<Element> elimination;
+    private ArrayList<Element<E>> elimination;
     private Random priotity;
     private Heap pQueue; 
     private AtomicBoolean lock;
@@ -39,51 +39,53 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
     // Add element into our priority queue
     public void insert(E element) {
         Element<E> inserting = new Element<>(element, INSERT, priotity.nextInt());
+        Element<E> minValue = pQueue.getMin();
 
-        if (inserting.priority < pQueue.getMin().priority) {
-            elimination.add(inserting);
+        if (minValue != null && inserting.priority < minValue.priority) {
+            //elimination.add(inserting);
             return;
         }
 
         if (pQueue.insert(inserting)) {
             return;
         } else {
-            elimination.add(inserting);
+            //elimination.add(inserting);
         }
     }
 
     // Removes minimum priority element from priority queue
     public E retrieve() throws EmptyQueueException {
         Element<E> retVal;
-
-        for(Element object: elimination) {
+/*
+        for(Element<E> object: elimination) {
             if (object.priority < pQueue.getMin().priority && object.status == INSERT) {
                 retVal = elimination.get(elimination.indexOf(object));
                 elimination.get(elimination.indexOf(object)).status = REMOVE;
                 return retVal.value;
             }
         }
-
+*/
         retVal = pQueue.removeMin();
+        if(retVal == null) return null;
         return retVal.value;     
     }
 
     // Server thread that constantly checks elimination array for 
     // removes and values that need to be added to the skiplist
     private class Server extends Thread {
-        protected volatile boolean run;
+        protected volatile boolean isRunning;
 
         public Server() {
-            run = true;
+            isRunning = true;
         }
 
         public void finish() {
-            run = false;
+            isRunning = false;
         }
         
         public void run(){
-            while (run)
-                for(Element object: elimination) {
+            while (isRunning)
+                for(Element<E> object: elimination) {
                     if (object.status == REMOVE)
                         elimination.remove(object);
                     else if (object.status == INSERT){

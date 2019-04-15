@@ -21,7 +21,7 @@ public class PrioritetskoTester {
         Arguments arguments = parseArguments(argumentsVector);
         ArrayList<PriorityQueue<Integer>> queues = new ArrayList<PriorityQueue<Integer>>();
         queues.add(new SynchronizedPriorityQueue<Integer>());
-        queues.add(new SynchronizedPriorityQueue<Integer>());
+        queues.add(new ECPriorityQueue<Integer>());
         queues.add(new SynchronizedPriorityQueue<Integer>());
         
         // Run tests on each queue and save the results in an array.
