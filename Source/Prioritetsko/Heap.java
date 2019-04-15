@@ -6,20 +6,20 @@ package Prioritetsko;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Heap
+public class Heap<E extends Comparable<E>>
 {
-    private AtomicReference<ArrayList<Element>> minHeap;
+    private AtomicReference<ArrayList<Element<E>>> minHeap;
 
     public Heap()
     {
-        minHeap = new AtomicReference<ArrayList<Element>>(new ArrayList<Element>());
+        minHeap = new AtomicReference<ArrayList<Element<E>>>(new ArrayList<Element<E>>());
     }
 
     // Insert Element by priority into minheap
-    public boolean insert(Element e)
+    public boolean insert(Element<E> e)
     {
-        ArrayList<Element> currentHeap = minHeap.get();
-        ArrayList<Element> updatedHeap = new ArrayList<Element>(currentHeap);
+        ArrayList<Element<E>> currentHeap = minHeap.get();
+        ArrayList<Element<E>> updatedHeap = new ArrayList<Element<E>>(currentHeap);
 
         // Insert element into currentHeap
         updatedHeap.add(e);
@@ -29,23 +29,23 @@ public class Heap
     }
 
     // Remove min Element by priority from minheap
-    public Element removeMin()
+    public Element<E> removeMin()
     {
-        ArrayList<Element> currentHeap;
-        ArrayList<Element> updatedHeap;
-        Element min;
+        ArrayList<Element<E>> currentHeap;
+        ArrayList<Element<E>> updatedHeap;
+        Element<E> min;
 
         // Continue until successful
         do
         {
             currentHeap = minHeap.get();
-            updatedHeap = new ArrayList<Element>(currentHeap);
+            updatedHeap = new ArrayList<Element<E>>(currentHeap);
 
             if (currentHeap.size() <= 0 )
                 return null;
 
             min = updatedHeap.get(0);
-            Element rem = updatedHeap.remove(updatedHeap.size() - 1);
+            Element<E> rem = updatedHeap.remove(updatedHeap.size() - 1);
 
             if (updatedHeap.size() > 0)
                 updatedHeap.set(0, rem);
@@ -56,9 +56,9 @@ public class Heap
     }
 
     // Get min Element without removing
-    public Element getMin()
+    public Element<E> getMin()
     {
-        ArrayList<Element> currentHeap = minHeap.get();
+        ArrayList<Element<E>> currentHeap = minHeap.get();
 
         if (currentHeap.size() <= 0)
             return null;
@@ -67,7 +67,7 @@ public class Heap
     }
 
     // Percolate Element up through minheap
-    private ArrayList<Element> percolateUp(ArrayList<Element> heap, int idx)
+    private ArrayList<Element<E>> percolateUp(ArrayList<Element<E>> heap, int idx)
     {
         int parent = 0;
         
@@ -86,9 +86,9 @@ public class Heap
     }
 
     // Percolate Elementdown through minheap
-    private ArrayList<Element> percolateDown(ArrayList<Element> heap, int idx)
+    private ArrayList<Element<E>> percolateDown(ArrayList<Element<E>> heap, int idx)
     {
-        Element child = getMinChild(heap, idx);
+        Element<E> child = getMinChild(heap, idx);
         if (child == null)
             return heap;
         int childIdx = heap.indexOf(child);
@@ -111,9 +111,9 @@ public class Heap
     }
 
     // Swap to values in heap
-    private ArrayList<Element> swap(ArrayList<Element> heap, int first, int second)
+    private ArrayList<Element<E>> swap(ArrayList<Element<E>> heap, int first, int second)
     {
-        Element temp = heap.get(first);
+        Element<E> temp = heap.get(first);
         heap.set(first, heap.get(second));
         heap.set(second, temp);
 
@@ -121,7 +121,7 @@ public class Heap
     }
 
     // Get the min priority child for parent
-    private Element getMinChild(ArrayList<Element> heap, int parent)
+    private Element<E> getMinChild(ArrayList<Element<E>> heap, int parent)
     {
         int left = (parent * 2) + 1;
         int right = (parent * 2) + 2;
