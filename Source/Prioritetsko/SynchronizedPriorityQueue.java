@@ -12,6 +12,8 @@ import java.util.Collections;
 public class SynchronizedPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
     private ArrayList<E> elements;
 
+    public void finish() {}
+
     // Create a new, empty priority queue.
     public SynchronizedPriorityQueue() {
         elements = new ArrayList<E>();

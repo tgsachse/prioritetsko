@@ -147,6 +147,7 @@ public class PrioritetskoTester {
             thread.join();
         }
         long stopTime = System.nanoTime();
+	queue.finish();
 
         // Return the execution time of this test (per thread) in milliseconds.
         return ((double) (stopTime - startTime)) / 1000000 / totalThreads;

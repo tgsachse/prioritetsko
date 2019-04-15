@@ -5,10 +5,11 @@ package Prioritetsko;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
-    private ArrayList<Element<E>> elimination;
+    private CopyOnWriteArrayList<Element<E>> elimination;
     private Random priotity;
     private Heap pQueue; 
     private AtomicBoolean lock;
@@ -24,7 +25,7 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
         pQueue = new Heap(); 
 
         // Initialize elimination array
-        elimination = new ArrayList<>();
+        elimination = new CopyOnWriteArrayList<>();
 
         // Random number to assign to new elements
         priotity = new Random();
@@ -42,14 +43,14 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
         Element<E> minValue = pQueue.getMin();
 
         if (minValue != null && inserting.priority < minValue.priority) {
-            //elimination.add(inserting);
+            elimination.add(inserting);
             return;
         }
 
         if (pQueue.insert(inserting)) {
             return;
         } else {
-            //elimination.add(inserting);
+            elimination.add(inserting);
         }
     }
 
@@ -68,6 +69,10 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
         retVal = pQueue.removeMin();
         if(retVal == null) return null;
         return retVal.value;     
+    }
+
+    public void finish() {
+        serverThread.finish();
     }
 
     // Server thread that constantly checks elimination array for 
