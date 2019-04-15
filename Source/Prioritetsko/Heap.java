@@ -41,8 +41,14 @@ public class Heap
             currentHeap = minHeap.get();
             updatedHeap = currentHeap;
 
+            if (currentHeap.size() == 0)
+                return null;
+
             min = updatedHeap.get(0);
-            updatedHeap.set(0, updatedHeap.remove(updatedHeap.size()));
+            Element rem = updatedHeap.remove(updatedHeap.size() - 1);
+
+            if (updatedHeap.size() > 0)
+                updatedHeap.set(0, rem);
             updatedHeap = percolateDown(updatedHeap, 0);
         } while (!minHeap.compareAndSet(currentHeap, updatedHeap));
 
@@ -52,7 +58,12 @@ public class Heap
     // Get min Element without removing
     public Element getMin()
     {
-        return minHeap.get().get(0);
+        ArrayList<Element> currentHeap = minHeap.get();
+
+        if (currentHeap.size() == 0)
+            return null;
+
+        return currentHeap.get(0);
     }
 
     // Percolate Element up through minheap
@@ -71,13 +82,6 @@ public class Heap
             }
         }
 
-        // Make sure that any duplicate priorities are stored in left child
-        if (leftOrRight(parent, idx))
-        {
-            if (heap.get(parent).priority == heap.get(idx).priority)
-                heap = swap(heap, idx, idx-1);
-        }
-
         return heap;
     }
 
@@ -85,21 +89,22 @@ public class Heap
     private ArrayList<Element> percolateDown(ArrayList<Element> heap, int idx)
     {
         Element child = getMinChild(heap, idx);
+        if (child == null)
+            return heap;
         int childIdx = heap.indexOf(child);
 
-        while (child.priority < heap.get(idx).priority)
+        if (heap.size() > 1)
         {
-            heap = swap(heap, idx, childIdx);
-            idx = childIdx;
-            child = getMinChild(heap, idx);
-            childIdx = heap.indexOf(child);
-        }
+            while (child.priority < heap.get(idx).priority)
+            {
+                heap = swap(heap, idx, childIdx);
+                idx = childIdx;
+                child = getMinChild(heap, idx);
+                if (child == null)
+                    return heap;
 
-        // Make sure that any duplicate priorities are stored in left child
-        if (leftOrRight(idx, childIdx))
-        {
-            if (heap.get(idx).priority == child.priority)
-                heap = swap(heap, childIdx, childIdx-1);
+                childIdx = heap.indexOf(child);
+            }
         }
         
         return heap;
@@ -115,27 +120,24 @@ public class Heap
         return heap;
     }
 
-    // Return true if it is a right child or false if it is a left child
-    private boolean leftOrRight(int parent, int child)
-    {
-        // int left = (parent * 2) + 1;
-        int right = (parent * 2) + 2;
-
-        if (child == right)
-            return true;
-
-        return false;
-    }
-
     // Get the min priority child for parent
     private Element getMinChild(ArrayList<Element> heap, int parent)
     {
         int left = (parent * 2) + 1;
         int right = (parent * 2) + 2;
         
-        if (heap.get(left).priority > heap.get(right).priority)
-            return heap.get(right);
+        if (left < heap.size() && right < heap.size())
+        {
+            if (heap.get(left).priority > heap.get(right).priority)
+                return heap.get(right);
 
-        return heap.get(left);
+            return heap.get(left);
+        }
+        else if (left < heap.size())
+        {
+            return heap.get(left);
+        }
+        
+        return null;
     }
 }
