@@ -21,7 +21,7 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
 
     public ECPriorityQueue () {
         // Initialize our priority queue
-        pQueue = new Heap<>(); 
+        pQueue = new Heap(); 
 
         // Initialize elimination array
         elimination = new ArrayList<>();
@@ -56,22 +56,16 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
     public E retrieve() throws EmptyQueueException {
         Element<E> retVal;
 
-        while (lock.compareAndSet(false, true)) {}
         for(Element object: elimination) {
             if (object.priority < pQueue.getMin().priority && object.status == INSERT) {
                 retVal = elimination.get(elimination.indexOf(object));
                 elimination.get(elimination.indexOf(object)).status = REMOVE;
-                return retVal;
+                return retVal.value;
             }
         }
-        lock.getAndSet(false);
 
-        try {
-            retVal = pQueue.removeMin();
-            return retVal.value;
-        } catch (EmptyQueueException exception) {
-            System.out.println("Queue is empty!");
-        }        
+        retVal = pQueue.removeMin();
+        return retVal.value;     
     }
 
     // Server thread that constantly checks elimination array for 
@@ -83,20 +77,19 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
             run = true;
         }
 
-        public finish() {
+        public void finish() {
             run = false;
         }
         
         public void run(){
             while (run)
                 for(Element object: elimination) {
-                    if (lock.get() == false)
-                        if (object.status == REMOVE)
+                    if (object.status == REMOVE)
+                        elimination.remove(object);
+                    else if (object.status == INSERT){
+                        if (pQueue.insert(object))
                             elimination.remove(object);
-                        else if (object.status == INSERT){
-                            if (pQueue.insert(object))
-                                elimination.remove(object);
-                        }
+                    }
                 }
         }
     }
