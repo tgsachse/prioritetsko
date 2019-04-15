@@ -82,17 +82,21 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
         public Server() {
             run = true;
         }
+
+        public finish() {
+            run = false;
+        }
         
         public void run(){
             while (run)
                 for(Element object: elimination) {
-                    if (object.status == REMOVE)
-                        elimination.remove(object);
-                    
-                    else if (object.status == INSERT){
-                        if (pQueue.insert(object))
+                    if (lock.get() == false)
+                        if (object.status == REMOVE)
                             elimination.remove(object);
-                    }
+                        else if (object.status == INSERT){
+                            if (pQueue.insert(object))
+                                elimination.remove(object);
+                        }
                 }
         }
     }
