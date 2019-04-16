@@ -4,9 +4,9 @@ This project provides an adaptive, concurrent priority queue with elimination an
 
 execution
 ----
-This program is provided as a jar, and can be executed as shown below. The arguments in <arrow brackets> are required. The argument in [normal brackets] is optional.
+This program is provided as a zip, and can be executed as shown below. The arguments in <arrow brackets> are required. The argument in [normal brackets] is optional.
 ::
-    java -jar PrioritetskoTester <totalThreads> <totalPushes> <totalPops> [totalRuns]
+    sh develop.sh --run <totalThreads> <totalPushes> <totalPops> [totalRuns]
 
 development
 ----
