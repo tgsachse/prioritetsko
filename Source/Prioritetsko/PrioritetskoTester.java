@@ -21,7 +21,7 @@ public class PrioritetskoTester {
         Arguments arguments = parseArguments(argumentsVector);
         ArrayList<PriorityQueue<Integer>> queues = new ArrayList<PriorityQueue<Integer>>();
         queues.add(new SynchronizedPriorityQueue<Integer>());
-        queues.add(new SynchronizedPriorityQueue<Integer>());
+        queues.add(new ECPriorityQueue<Integer>());
         queues.add(new SynchronizedPriorityQueue<Integer>());
         
         // Run tests on each queue and save the results in an array.
@@ -147,6 +147,7 @@ public class PrioritetskoTester {
             thread.join();
         }
         long stopTime = System.nanoTime();
+	queue.finish();
 
         // Return the execution time of this test (per thread) in milliseconds.
         return ((double) (stopTime - startTime)) / 1000000 / totalThreads;

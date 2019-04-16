@@ -9,4 +9,5 @@ import java.lang.Comparable;
 public interface PriorityQueue<E extends Comparable<E>> {
     public void insert(E element);
     public E retrieve() throws EmptyQueueException;
+    public void finish();
 }
