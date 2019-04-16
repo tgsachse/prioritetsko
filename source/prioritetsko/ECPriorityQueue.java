@@ -57,15 +57,19 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
     // Removes minimum priority element from priority queue
     public E retrieve() throws EmptyQueueException {
         Element<E> retVal;
-/*
+
         for(Element<E> object: elimination) {
-            if (object.priority < pQueue.getMin().priority && object.status == INSERT) {
-                retVal = elimination.get(elimination.indexOf(object));
-                elimination.get(elimination.indexOf(object)).status = REMOVE;
-                return retVal.value;
+            try{
+                if (object.priority < pQueue.getMin().priority && object.status == INSERT) {
+                    retVal = elimination.get(elimination.indexOf(object));
+                    elimination.get(elimination.indexOf(object)).status = REMOVE;
+                    return retVal.value;
+                 }
+            } catch (NullPointerException e) {
+                return null;
             }
         }
-*/
+
         retVal = pQueue.removeMin();
         if(retVal == null) return null;
         return retVal.value;     
