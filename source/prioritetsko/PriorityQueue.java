@@ -1,7 +1,7 @@
 // The general interface for all priority queues in this package.
 // Written by Tiger Sachse.
 
-package Prioritetsko;
+package prioritetsko;
 
 import java.lang.Comparable;
 

@@ -1,13 +1,14 @@
 // A priority queue that implements Software Transactional Memory.
 // Written by Harrison Black and Tiger Sachse.
 
-package Prioritetsko;
+package prioritetsko;
 
 import java.util.ArrayList;
 import java.lang.Comparable;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.deuce.Atomic;
 // These three can be removed later
 import java.util.Stack;
 import java.util.Random;
@@ -212,12 +213,13 @@ public class STMPriorityQueue<E extends Comparable<E>> implements PriorityQueue<
             rightChildIndex = getRightChildIndex(currentIndex);
         }
     }
-
+}
     // EVERYTHING BELOW HERE WILL BE DELETED
 
     // This class has it's own main at the moment due to deuce needed
     // to be compiled as a jar. I am testing this file on it's own for
     // now and will integrated it into the script later. 
+    /*
     public static void main(String[] args) throws InterruptedException {
         int totalRuns = 10;
         int totalThreads = 10;
@@ -397,3 +399,4 @@ class Arguments {
 }
 
 }
+*/

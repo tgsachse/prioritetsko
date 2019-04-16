@@ -1,7 +1,7 @@
 // Heap Implementation used by Priority Queue
 // Written by Ben Faria
 
-package Prioritetsko;
+package prioritetsko;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;

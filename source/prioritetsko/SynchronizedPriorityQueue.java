@@ -1,7 +1,7 @@
 // A synchronized (coarse-grained locking) priority queue from scratch.
 // Written by Tiger Sachse.
 
-package Prioritetsko;
+package prioritetsko;
 
 import java.util.ArrayList;
 import java.lang.Comparable;

@@ -3,7 +3,7 @@
 //     $ java PrioritetskoTester <totalThreads> <totalPushes> <totalPops> [totalRuns]
 // Written by Tiger Sachse.
 
-package Prioritetsko;
+package prioritetsko;
 
 import java.util.Stack;
 import java.util.Random;

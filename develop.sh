@@ -2,27 +2,31 @@
 # Some useful development functions for this repository!
 # Written by Tiger Sachse.
 
-DOCS_DIR="Docs"
-DIST_DIR="Dist"
-BUILD_DIR="Build"
-SOURCE_DIR="Source"
+LIB_DIR="lib"
+DOCS_DIR="docs"
+DIST_DIR="dist"
+BUILD_DIR="build"
+SOURCE_DIR="source"
 MANIFEST="manifest.txt"
-GRAPHER_SCRIPT="Grapher.py"
-PACKAGE_NAME="Prioritetsko"
-DOCS_JAR_DIR="Documentation"
+GRAPHER_SCRIPT="grapher.py"
+PACKAGE_NAME="prioritetsko"
 MAIN_CLASS="PrioritetskoTester"
+DEUCE_JAR="deuceAgent-1.3.0.jar"
 
 # Build the program in a build folder.
 build_program() {
     rm -rf "$BUILD_DIR"
     mkdir "$BUILD_DIR"
-    javac "$SOURCE_DIR/$PACKAGE_NAME"/* -d "$BUILD_DIR" "$@"
+    javac -cp "$LIB_DIR/$DEUCE_JAR" \
+          "$SOURCE_DIR/$PACKAGE_NAME"/* \
+          -d "$BUILD_DIR" "$@"
     if [ $? -ne 0 ]; then
         printf "Build process failed.\n"
         rm -rf "$BUILD_DIR"
 
         return 1
     fi
+    ln -s "$PWD/$LIB_DIR/" "$PWD/$BUILD_DIR/"
 }
 
 # Run the compiled program.
@@ -32,7 +36,7 @@ run_program() {
         printf "Please build the program first using --build.\n"
         exit 1
     fi
-    java "$PACKAGE_NAME.$MAIN_CLASS" "$@"
+    java -javaagent:"$LIB_DIR/$DEUCE_JAR" "$PACKAGE_NAME.$MAIN_CLASS" "$@"
     cd .. 1>/dev/null 2>&1
 }
 
@@ -56,13 +60,14 @@ package_program() {
     if [ $? -ne 0 ]; then
         exit 1
     fi
-    mkdir -p "$DIST_DIR" "$BUILD_DIR/$DOCS_JAR_DIR" "$BUILD_DIR/$SOURCE_DIR"
+    mkdir -p "$DIST_DIR" "$BUILD_DIR/$DOCS_DIR" "$BUILD_DIR/$SOURCE_DIR"
 
     # Copy documentation and source files into the build directory, and create
     # a manifest.
-    find "$DOCS_DIR"/* -type f \( -name "*.txt" -o -name "*.pdf" \) \
-        -exec cp {} "$BUILD_DIR/$DOCS_JAR_DIR" \;
-    cp -r "$SOURCE_DIR/$PACKAGE_NAME"/* "$BUILD_DIR/$SOURCE_DIR"
+    find "$DOCS_DIR"/* -type f \
+          \( -name "*.txt" -o -name "*.pdf" \) \
+          -exec ln -s "$PWD"/{} "$PWD/$BUILD_DIR/$DOCS_DIR/" \;
+    ln -s "$PWD/$SOURCE_DIR/$PACKAGE_NAME"/* "$PWD/$BUILD_DIR/$SOURCE_DIR/"
     printf "Main-Class: $PACKAGE_NAME.$MAIN_CLASS\n" > "$MANIFEST"
 
     # Create a jar with the contents of the build directory.
