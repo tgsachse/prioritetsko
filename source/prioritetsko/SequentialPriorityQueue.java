@@ -3,7 +3,6 @@
 
 package prioritetsko;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.lang.Comparable;
 import java.util.Collection;
@@ -14,7 +13,7 @@ public class SequentialPriorityQueue
     <E extends Comparable<E>>
     implements PriorityQueue<E> {
 
-    protected List<E> elements;
+    private ArrayList<E> elements;
 
     // Create a new, empty priority queue.
     public SequentialPriorityQueue() {
