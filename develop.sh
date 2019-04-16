@@ -4,10 +4,8 @@
 
 LIB_DIR="lib"
 DOCS_DIR="docs"
-DIST_DIR="dist"
 BUILD_DIR="build"
 SOURCE_DIR="source"
-MANIFEST="manifest.txt"
 GRAPHER_SCRIPT="grapher.py"
 PACKAGE_NAME="prioritetsko"
 MAIN_CLASS="PrioritetskoTester"
@@ -26,7 +24,6 @@ build_program() {
 
         return 1
     fi
-    ln -s "$PWD/$LIB_DIR/" "$PWD/$BUILD_DIR/"
 }
 
 # Run the compiled program.
@@ -36,7 +33,7 @@ run_program() {
         printf "Please build the program first using --build.\n"
         exit 1
     fi
-    java  -javaagent:"$LIB_DIR/$DEUCE_JAR" \
+    java  -javaagent:"../$LIB_DIR/$DEUCE_JAR" \
          "$PACKAGE_NAME.$MAIN_CLASS" "$@"
     cd .. 1>/dev/null 2>&1
 }
@@ -56,28 +53,14 @@ analyze_program() {
     run_program "$@" | tee /dev/tty | python3 "$GRAPHER_SCRIPT"
 }
 
-# Package the program into a jar.
+# Package the program.
 package_program() {
     build_program
     if [ $? -ne 0 ]; then
         exit 1
     fi
-    mkdir -p "$DIST_DIR" "$BUILD_DIR/$DOCS_DIR" "$BUILD_DIR/$SOURCE_DIR"
 
-    # Copy documentation and source files into the build directory, and create
-    # a manifest.
-    find "$DOCS_DIR"/* -type f \
-          \( -name "*.txt" -o -name "*.pdf" \) \
-          -exec ln -s "$PWD"/{} "$PWD/$BUILD_DIR/$DOCS_DIR/" \;
-    ln -s "$PWD/$SOURCE_DIR/$PACKAGE_NAME"/* "$PWD/$BUILD_DIR/$SOURCE_DIR/"
-    ############ might need more in manifest ##############
-    printf "Main-Class: $PACKAGE_NAME.$MAIN_CLASS\n" > "$MANIFEST"
-
-    # Create a jar with the contents of the build directory.
-    cd "$BUILD_DIR"
-
-    jar cvfm "../$DIST_DIR/$PACKAGE_NAME.jar" "../$MANIFEST" *
-    cd .. 1>/dev/null 2>&1
+    zip -r "$PACKAGE_NAME.zip" *
 
     cleanup
 }
@@ -85,7 +68,6 @@ package_program() {
 # Clean up any mess.
 cleanup() {
     rm -rf "$BUILD_DIR"
-    rm -f "$MANIFEST"
 }
 
 # Main entry point to the program.
