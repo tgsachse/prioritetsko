@@ -1,26 +1,28 @@
-// A synchronized (coarse-grained locking) priority queue from scratch.
+// A sequential priority queue from scratch.
 // Written by Tiger Sachse.
 
-package Prioritetsko;
+package prioritetsko;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.lang.Comparable;
 import java.util.Collection;
 import java.util.Collections;
 
-// Provides a synchronized, generic priority queue.
-public class SynchronizedPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
-    private ArrayList<E> elements;
+// Provides a sequential, generic priority queue.
+public class SequentialPriorityQueue
+    <E extends Comparable<E>>
+    implements PriorityQueue<E> {
 
-    public void finish() {}
+    protected List<E> elements;
 
     // Create a new, empty priority queue.
-    public SynchronizedPriorityQueue() {
+    public SequentialPriorityQueue() {
         elements = new ArrayList<E>();
     }
 
     // Create a new priority queue with a collection of elements.
-    public SynchronizedPriorityQueue(Collection<? extends E> collection) {
+    public SequentialPriorityQueue(Collection<? extends E> collection) {
         elements = new ArrayList<E>();
 
         for (E element : collection) {
@@ -30,7 +32,7 @@ public class SynchronizedPriorityQueue<E extends Comparable<E>> implements Prior
 
     @Override
     // Add an element to the priority queue.
-    public synchronized void insert(E element) {
+    public void insert(E element) {
 
         // The element is added to the end of the elements list and then is
         // percolated up to its appropriate position.
@@ -39,7 +41,7 @@ public class SynchronizedPriorityQueue<E extends Comparable<E>> implements Prior
     }
 
     // Add a collection of elements to the priority queue.
-    public synchronized void insert(Collection<? extends E> collection) {
+    public void insert(Collection<? extends E> collection) {
         for (E element : collection) {
             insert(element);
         }
@@ -47,7 +49,7 @@ public class SynchronizedPriorityQueue<E extends Comparable<E>> implements Prior
 
     @Override
     // Get and remove the element at the front of the priority queue.
-    public synchronized E retrieve() throws EmptyQueueException {
+    public E retrieve() throws EmptyQueueException {
 
         // Attempt to retrieve the front element. If the queue is empty, throw
         // an exception.
@@ -74,7 +76,7 @@ public class SynchronizedPriorityQueue<E extends Comparable<E>> implements Prior
     }
 
     // Get the element at the front of the priority queue.
-    public synchronized E peek() throws EmptyQueueException {
+    public E peek() throws EmptyQueueException {
         try {
             return elements.get(0);
         }
@@ -84,12 +86,12 @@ public class SynchronizedPriorityQueue<E extends Comparable<E>> implements Prior
     }
 
     // Check if the priority queue is empty.
-    public synchronized boolean isEmpty() {
+    public boolean isEmpty() {
         return elements.isEmpty();
     }
 
     // Get a string representation of this priority queue.
-    public synchronized String toString() {
+    public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (int elementIndex = 1; elementIndex < (getMaxIndex()); elementIndex++) {
@@ -102,14 +104,18 @@ public class SynchronizedPriorityQueue<E extends Comparable<E>> implements Prior
     }
 
     // Clear out the priority queue.
-    public synchronized void clear() {
+    public void clear() {
         elements.clear();
     }
 
     // Get the size of the priority queue.
-    public synchronized int size() {
+    public int size() {
         return elements.size();
     }
+
+    @Override
+    // Only necessary to match the priority queue interface.
+    public void finish() {}
 
     // Get a parent's left child's index.
     private int getLeftChildIndex(int parentIndex) {
@@ -143,7 +149,10 @@ public class SynchronizedPriorityQueue<E extends Comparable<E>> implements Prior
             E parentElement = elements.get(parentIndex);
             E currentElement = elements.get(currentIndex);
 
-            if (parentElement.compareTo(currentElement) > 0) {
+            if (parentElement == null || currentElement == null) {
+                break;
+            }
+            else if (parentElement.compareTo(currentElement) > 0) {
                 Collections.swap(elements, parentIndex, currentIndex);
                 currentIndex = parentIndex;
                 parentIndex = getParentIndex(currentIndex);

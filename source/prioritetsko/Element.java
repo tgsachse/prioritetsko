@@ -1,6 +1,6 @@
 // Written by Christopher Taliaferro
 
-package Prioritetsko;
+package prioritetsko;
 
 class Element<E extends Comparable<E>> {
     public E value;

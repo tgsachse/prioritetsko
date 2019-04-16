@@ -1,7 +1,7 @@
 // Adaptive Priority Queue with Elimination and Combining.
 // Written by Christopher Taliaferro
 
-package Prioritetsko;
+package prioritetsko;
 
 import java.util.ArrayList;
 import java.util.Random;
