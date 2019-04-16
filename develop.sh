@@ -12,13 +12,12 @@ GRAPHER_SCRIPT="grapher.py"
 PACKAGE_NAME="prioritetsko"
 MAIN_CLASS="PrioritetskoTester"
 DEUCE_JAR="deuceAgent-1.3.0.jar"
-JAVOLUTION_JAR="javolution-core-java-6.0.0.jar"
 
 # Build the program in a build folder.
 build_program() {
     rm -rf "$BUILD_DIR"
     mkdir "$BUILD_DIR"
-    javac -cp "$LIB_DIR/$DEUCE_JAR:$LIB_DIR/$JAVOLUTION_JAR" \
+    javac -cp "$LIB_DIR/$DEUCE_JAR" \
           "$SOURCE_DIR/$PACKAGE_NAME"/* \
           -d "$BUILD_DIR" "$@"
     if [ $? -ne 0 ]; then
@@ -37,8 +36,7 @@ run_program() {
         printf "Please build the program first using --build.\n"
         exit 1
     fi
-    java -cp "$LIB_DIR/$JAVOLUTION_JAR:." \
-         -javaagent:"$LIB_DIR/$DEUCE_JAR" \
+    java  -javaagent:"$LIB_DIR/$DEUCE_JAR" \
          "$PACKAGE_NAME.$MAIN_CLASS" "$@"
     cd .. 1>/dev/null 2>&1
 }
@@ -54,7 +52,8 @@ build_and_run_program() {
 
 # Build and run the program, then pipe results to a graphing script.
 analyze_program() {
-    build_and_run_program "$@" | tee /dev/tty | python3 "$GRAPHER_SCRIPT"
+    build_program 1>/dev/null 2>&1
+    run_program "$@" | tee /dev/tty | python3 "$GRAPHER_SCRIPT"
 }
 
 # Package the program into a jar.

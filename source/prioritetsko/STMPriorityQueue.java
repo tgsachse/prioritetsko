@@ -6,61 +6,97 @@ package prioritetsko;
 import org.deuce.Atomic;
 import java.lang.Comparable;
 import java.util.Collection;
-import javolution.util.FastTable;
+import org.deuce.transaction.TransactionException;
 
 public class STMPriorityQueue
     <E extends Comparable<E>>
     extends SequentialPriorityQueue<E> {
 
-    public STMPriorityQueue() {
-        elements = new FastTable<E>();
-    }
-
     @Override
     @Atomic
     public void insert(E element) {
-        super.insert(element);
+        try {
+            super.insert(element);
+        }
+        catch (NullPointerException | IndexOutOfBoundsException exception) {
+            throw new TransactionException();
+        }
     }
 
     @Override
     @Atomic
     public void insert(Collection<? extends E> collection) {
-        super.insert(collection);
+        try {
+            super.insert(collection);
+        }
+        catch (NullPointerException | IndexOutOfBoundsException exception) {
+            throw new TransactionException();
+        }
     }
 
     @Override
     @Atomic
     public E retrieve() throws EmptyQueueException {
-        return super.retrieve();
+        try {
+            return super.retrieve();
+        }
+        catch (NullPointerException | IndexOutOfBoundsException exception) {
+            throw new TransactionException();
+        }
     }
 
     @Override
     @Atomic
     public E peek() throws EmptyQueueException {
-        return super.peek();
+        try {
+            return super.peek();
+        }
+        catch (NullPointerException | IndexOutOfBoundsException exception) {
+            throw new TransactionException();
+        }
     }
 
     @Override
     @Atomic
     public boolean isEmpty() {
-        return super.isEmpty();
+        try {
+            return super.isEmpty();
+        }
+        catch (NullPointerException | IndexOutOfBoundsException exception) {
+            throw new TransactionException();
+        }
     }
 
     @Override
     @Atomic
     public String toString() {
-        return super.toString();
+        try {
+            return super.toString();
+        }
+        catch (NullPointerException | IndexOutOfBoundsException exception) {
+            throw new TransactionException();
+        }
     }
 
     @Override
     @Atomic
     public void clear() {
-        super.clear();
+        try {
+            super.clear();
+        }
+        catch (NullPointerException | IndexOutOfBoundsException exception) {
+            throw new TransactionException();
+        }
     }
 
     @Override
     @Atomic
     public int size() {
-        return super.size();
+        try {
+            return super.size();
+        }
+        catch (NullPointerException | IndexOutOfBoundsException exception) {
+            throw new TransactionException();
+        }
     }
 }
