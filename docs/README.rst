@@ -10,7 +10,7 @@ This program is provided as a jar, and can be executed as shown below. The argum
 
 development
 ----
-This repository contains a script, ``Develop.sh`` that automates many development functions you might wish to perform. Here is a full list of flags that the script accepts.
+This repository contains a script, ``develop.sh`` that automates many development functions you might wish to perform. Here is a full list of flags that the script accepts.
 
 ``-b, --build <build arguments...>``
   Build the software into the ``Build`` directory.
@@ -30,16 +30,16 @@ examples
 Here are some development example commands to get you started.
 ::
   # Build the project.
-  sh Develop.sh --build
+  sh develop.sh --build
   
   # Run the project across 32 threads, with 1000 total pushes and 2000 total pops.
-  sh Develop.sh --run 32 1000 2000
+  sh develop.sh --run 32 1000 2000
   
   # Build the project and run it with the same parameters as above and 20 runs per thread.
-  sh Develop.sh --bar 32 1000 2000 20
+  sh develop.sh --bar 32 1000 2000 20
   
   # Produce a results graph for 16 threads, with 200 total pushes and 100 total pops.
-  sh Develop.sh --analyze 16 200 100
+  sh develop.sh --analyze 16 200 100
 
   # Package the project.
-  sh Develop.sh --pack
+  sh develop.sh --pack

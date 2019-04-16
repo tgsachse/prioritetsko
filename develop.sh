@@ -12,12 +12,13 @@ GRAPHER_SCRIPT="grapher.py"
 PACKAGE_NAME="prioritetsko"
 MAIN_CLASS="PrioritetskoTester"
 DEUCE_JAR="deuceAgent-1.3.0.jar"
+JAVOLUTION_JAR="javolution-core-java-6.0.0.jar"
 
 # Build the program in a build folder.
 build_program() {
     rm -rf "$BUILD_DIR"
     mkdir "$BUILD_DIR"
-    javac -cp "$LIB_DIR/$DEUCE_JAR" \
+    javac -cp "$LIB_DIR/$DEUCE_JAR:$LIB_DIR/$JAVOLUTION_JAR" \
           "$SOURCE_DIR/$PACKAGE_NAME"/* \
           -d "$BUILD_DIR" "$@"
     if [ $? -ne 0 ]; then
@@ -36,7 +37,9 @@ run_program() {
         printf "Please build the program first using --build.\n"
         exit 1
     fi
-    java -javaagent:"$LIB_DIR/$DEUCE_JAR" "$PACKAGE_NAME.$MAIN_CLASS" "$@"
+    java -cp "$LIB_DIR/$JAVOLUTION_JAR:." \
+         -javaagent:"$LIB_DIR/$DEUCE_JAR" \
+         "$PACKAGE_NAME.$MAIN_CLASS" "$@"
     cd .. 1>/dev/null 2>&1
 }
 
@@ -68,10 +71,12 @@ package_program() {
           \( -name "*.txt" -o -name "*.pdf" \) \
           -exec ln -s "$PWD"/{} "$PWD/$BUILD_DIR/$DOCS_DIR/" \;
     ln -s "$PWD/$SOURCE_DIR/$PACKAGE_NAME"/* "$PWD/$BUILD_DIR/$SOURCE_DIR/"
+    ############ might need more in manifest ##############
     printf "Main-Class: $PACKAGE_NAME.$MAIN_CLASS\n" > "$MANIFEST"
 
     # Create a jar with the contents of the build directory.
     cd "$BUILD_DIR"
+
     jar cvfm "../$DIST_DIR/$PACKAGE_NAME.jar" "../$MANIFEST" *
     cd .. 1>/dev/null 2>&1
 
