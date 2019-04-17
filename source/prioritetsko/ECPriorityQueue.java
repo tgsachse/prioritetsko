@@ -9,9 +9,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
-    private CopyOnWriteArrayList<Element<E>> elimination;
+    public CopyOnWriteArrayList<Element<E>> elimination;
+    public Heap<E> pQueue; 
     private Random priotity;
-    private Heap pQueue; 
     private AtomicBoolean lock;
 
     // Server thread that handles elimination array operations
@@ -22,7 +22,7 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
 
     public ECPriorityQueue () {
         // Initialize our priority queue
-        pQueue = new Heap(); 
+        pQueue = new Heap<E>(); 
 
         // Initialize elimination array
         elimination = new CopyOnWriteArrayList<>();
