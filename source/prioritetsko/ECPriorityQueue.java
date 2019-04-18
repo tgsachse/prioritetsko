@@ -71,9 +71,11 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
             if (currentpQueue.getMin() == null || (object.priority < currentpQueue.getMin().priority && object.status == INSERT)) {
                 int idx = copiedElimination.indexOf(object);
                 retVal = copiedElimination.get(idx);
-                Element<E> newElement = new Element<E>(retVal.value, REMOVE, retVal.priority);
-                elimination.add(newElement);
-                elimination.remove(object);
+                if (!elimination.remove(object))
+                {
+                    Element<E> newElement = new Element<E>(retVal.value, REMOVE, retVal.priority);
+                    elimination.add(newElement);
+                }
                 return retVal.value;
             }
         }
