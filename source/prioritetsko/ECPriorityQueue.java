@@ -116,7 +116,15 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
                 CopyOnWriteArrayList<Element<E>> copiedElimination = new CopyOnWriteArrayList<Element<E>>(elimination);
                 for(Element<E> object: copiedElimination) {
                     if (object.status == REMOVE)
+                    {
+                        do {
+                            currentpQueue = pQueue.get();
+                            updatedpQueue = new Heap<E>(currentpQueue);
+                
+                            updatedpQueue.removeMin();
+                        }while (!pQueue.compareAndSet(currentpQueue, updatedpQueue));
                         elimination.remove(object);
+                    }
                     else if (object.status == INSERT){
                         currentpQueue = pQueue.get();
                         updatedpQueue = new Heap<E>(currentpQueue);
