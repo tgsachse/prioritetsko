@@ -50,7 +50,7 @@ build_and_run_program() {
 # Build and run the program, then pipe results to a graphing script.
 analyze_program() {
     build_program 1>/dev/null 2>&1
-    run_program "$@" | tee /dev/tty | python3 "$GRAPHER_SCRIPT"
+    run_program "$@" | tee /dev/tty | python3 "$GRAPHER_SCRIPT" "$2" "$3"
 }
 
 # Package the program.

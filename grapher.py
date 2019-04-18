@@ -14,7 +14,7 @@ from matplotlib.ticker import MaxNLocator
 X_LABEL = "Threads"
 Y_LABEL = "Milliseconds"
 OUTPUT_FILE_NAME = "results.png"
-GRAPH_TITLE = "Execution Time Per Thread"
+GRAPH_TITLE_FORMAT = "Execution Time Per Thread ({0}:{1} Push/Pop Ratio)"
 HEADER_REGEX = r"^Execution time per thread for the (?P<queue_name>\w+):\n$"
 DATA_LINE_REGEX = (
     r"^Threads:\s+(?P<thread_count>\d+)"
@@ -55,7 +55,14 @@ def get_graphs_from_stdin(header_regex, data_line_regex):
     return graphs
 
 
-def plot_graphs(graphs, x_label, y_label, graph_title, output_file_name):
+def plot_graphs(
+    graphs,
+    total_pushes,
+    total_pops,
+    x_label,
+    y_label,
+    graph_title_format,
+    output_file_name):
     """Plot all graph data using Matplotlib."""
 
     # Set the x axis to always be whole numbers.
@@ -69,14 +76,24 @@ def plot_graphs(graphs, x_label, y_label, graph_title, output_file_name):
             label=graph["name"],
         )
 
-    pyplot.title(graph_title)
+    pyplot.title(graph_title_format.format(total_pushes, total_pops))
     pyplot.xlabel(x_label)
     pyplot.ylabel(y_label)
-    pyplot.legend(loc="lower right")
+    pyplot.legend(loc="upper right")
 
     pyplot.savefig(output_file_name)
 
 
 # Main entry point to this script.
+total_pushes = sys.argv[1]
+total_pops = sys.argv[2]
 graphs = get_graphs_from_stdin(HEADER_REGEX, DATA_LINE_REGEX)
-plot_graphs(graphs, X_LABEL, Y_LABEL, GRAPH_TITLE, OUTPUT_FILE_NAME)
+plot_graphs(
+    graphs,
+    total_pushes,
+    total_pops,
+    X_LABEL,
+    Y_LABEL,
+    GRAPH_TITLE_FORMAT,
+    OUTPUT_FILE_NAME,
+)
