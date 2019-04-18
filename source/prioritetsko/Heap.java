@@ -8,49 +8,39 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Heap<E extends Comparable<E>>
 {
-    private AtomicReference<ArrayList<Element<E>>> minHeap;
+    public ArrayList<Element<E>> minHeap;
 
     public Heap()
     {
-        minHeap = new AtomicReference<ArrayList<Element<E>>>(new ArrayList<Element<E>>());
+        minHeap = new ArrayList<Element<E>>();
+    }
+
+    public Heap(Heap<E> h)
+    {
+        minHeap = h.minHeap;
     }
 
     // Insert Element by priority into minheap
-    public boolean insert(Element<E> e)
+    public void insert(Element<E> e)
     {
-        ArrayList<Element<E>> currentHeap = minHeap.get();
-        ArrayList<Element<E>> updatedHeap = new ArrayList<Element<E>>(currentHeap);
-
         // Insert element into currentHeap
-        updatedHeap.add(e);
-        updatedHeap = percolateUp(updatedHeap, updatedHeap.size() - 1);
-
-        return minHeap.compareAndSet(currentHeap, updatedHeap);
+        minHeap.add(e);
+        percolateUp(minHeap.size() - 1);
     }
 
     // Remove min Element by priority from minheap
     public Element<E> removeMin()
     {
-        ArrayList<Element<E>> currentHeap;
-        ArrayList<Element<E>> updatedHeap;
-        Element<E> min;
+        if (minHeap.size() <= 0 )
+            return null;
 
-        // Continue until successful
-        do
-        {
-            currentHeap = minHeap.get();
-            updatedHeap = new ArrayList<Element<E>>(currentHeap);
+        Element<E> min = minHeap.get(0);
+        Element<E> rem = minHeap.remove(minHeap.size() - 1);
 
-            if (currentHeap.size() <= 0 )
-                return null;
+        if (minHeap.size() > 0)
+            minHeap.set(0, rem);
 
-            min = updatedHeap.get(0);
-            Element<E> rem = updatedHeap.remove(updatedHeap.size() - 1);
-
-            if (updatedHeap.size() > 0)
-                updatedHeap.set(0, rem);
-            updatedHeap = percolateDown(updatedHeap, 0);
-        } while (!minHeap.compareAndSet(currentHeap, updatedHeap));
+        percolateDown(0);
 
         return min;
     }
@@ -58,16 +48,14 @@ public class Heap<E extends Comparable<E>>
     // Get min Element without removing
     public Element<E> getMin()
     {
-        ArrayList<Element<E>> currentHeap = minHeap.get();
-
-        if (currentHeap.size() <= 0)
+        if (minHeap.size() <= 0)
             return null;
 
-        return currentHeap.get(0);
+        return minHeap.get(0);
     }
 
     // Percolate Element up through minheap
-    private ArrayList<Element<E>> percolateUp(ArrayList<Element<E>> heap, int idx)
+    private void percolateUp(int idx)
     {
         int parent = 0;
         
@@ -75,67 +63,62 @@ public class Heap<E extends Comparable<E>>
         if (idx > 0)
         {
             parent = (idx - 1)/2;
-            if (heap.get(idx).priority < heap.get(parent).priority)
+            if (minHeap.get(idx).priority < minHeap.get(parent).priority)
             {
-                heap = swap(heap, parent, idx);
-                percolateUp(heap, parent);
+                swap(parent, idx);
+                percolateUp(parent);
             }
         }
-
-        return heap;
     }
 
     // Percolate Elementdown through minheap
-    private ArrayList<Element<E>> percolateDown(ArrayList<Element<E>> heap, int idx)
+    private void percolateDown(int idx)
     {
-        Element<E> child = getMinChild(heap, idx);
+        Element<E> child = getMinChild(idx);
         if (child == null)
-            return heap;
-        int childIdx = heap.indexOf(child);
+            return;
 
-        if (heap.size() > 1)
+        int childIdx = minHeap.indexOf(child);
+
+        if (minHeap.size() > 1)
         {
-            while (child.priority < heap.get(idx).priority)
+            while (child.priority < minHeap.get(idx).priority)
             {
-                heap = swap(heap, idx, childIdx);
+                swap(idx, childIdx);
                 idx = childIdx;
-                child = getMinChild(heap, idx);
+                child = getMinChild(idx);
                 if (child == null)
-                    return heap;
+                    return;
 
-                childIdx = heap.indexOf(child);
+                childIdx = minHeap.indexOf(child);
             }
         }
-        
-        return heap;
     }
 
     // Swap to values in heap
-    private ArrayList<Element<E>> swap(ArrayList<Element<E>> heap, int first, int second)
+    private void swap(int first, int second)
     {
-        Element<E> temp = heap.get(first);
-        heap.set(first, heap.get(second));
-        heap.set(second, temp);
-
-        return heap;
+        Element<E> temp = minHeap.get(first);
+        minHeap.set(first, minHeap.get(second));
+        minHeap.set(second, temp);
     }
 
     // Get the min priority child for parent
-    private Element<E> getMinChild(ArrayList<Element<E>> heap, int parent)
+    private Element<E> getMinChild(int parent)
     {
         int left = (parent * 2) + 1;
         int right = (parent * 2) + 2;
         
-        if (left < heap.size() && right < heap.size())
+        if (left < minHeap.size() && right < minHeap.size())
         {
-            if (heap.get(left).priority > heap.get(right).priority)
-                return heap.get(right);
+            if (minHeap.get(left).priority > minHeap.get(right).priority)
+                return minHeap.get(right);
 
-            return heap.get(left);
+            return minHeap.get(left);
         }
-        else if (left < heap.size())
+        else if (left < minHeap.size())
         {
-            return heap.get(left);
+            return minHeap.get(left);
         }
         
         return null;

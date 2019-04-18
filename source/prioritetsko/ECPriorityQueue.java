@@ -6,12 +6,13 @@ package prioritetsko;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
-    private CopyOnWriteArrayList<Element<E>> elimination;
+    public CopyOnWriteArrayList<Element<E>> elimination;
+    public AtomicReference<Heap<E>> pQueue; 
     private Random priotity;
-    private Heap pQueue; 
     private AtomicBoolean lock;
 
     // Server thread that handles elimination array operations
@@ -22,7 +23,7 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
 
     public ECPriorityQueue () {
         // Initialize our priority queue
-        pQueue = new Heap(); 
+        pQueue = new AtomicReference<Heap<E>>(new Heap<E>()); 
 
         // Initialize elimination array
         elimination = new CopyOnWriteArrayList<>();
@@ -39,35 +40,55 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
 
     // Add element into our priority queue
     public void insert(E element) {
+        Heap<E> currentpQueue = pQueue.get();
+        Heap<E> updatedpQueue = new Heap<E>(currentpQueue);
+
         Element<E> inserting = new Element<>(element, INSERT, priotity.nextInt());
-        Element<E> minValue = pQueue.getMin();
+        Element<E> minValue = updatedpQueue.getMin();
 
-        if (minValue != null && inserting.priority < minValue.priority) {
+        if (minValue == null || inserting.priority < minValue.priority) {
             elimination.add(inserting);
-            return;
         }
+        else {
+            updatedpQueue.insert(inserting);
 
-        if (pQueue.insert(inserting)) {
-            return;
-        } else {
-            elimination.add(inserting);
+            if (!pQueue.compareAndSet(currentpQueue, updatedpQueue))
+            {
+                elimination.add(inserting);
+            }
         }
     }
 
     // Removes minimum priority element from priority queue
     public E retrieve() throws EmptyQueueException {
+        Heap<E> currentpQueue = pQueue.get();
+        Heap<E> updatedpQueue;
+
+        CopyOnWriteArrayList<Element<E>> copiedElimination = new CopyOnWriteArrayList<Element<E>>(elimination);
         Element<E> retVal;
-/*
-        for(Element<E> object: elimination) {
-            if (object.priority < pQueue.getMin().priority && object.status == INSERT) {
-                retVal = elimination.get(elimination.indexOf(object));
-                elimination.get(elimination.indexOf(object)).status = REMOVE;
+
+        for(Element<E> object: copiedElimination) {
+            if (currentpQueue.getMin() == null || (object.priority < currentpQueue.getMin().priority && object.status == INSERT)) {
+                int idx = copiedElimination.indexOf(object);
+                retVal = copiedElimination.get(idx);
+                if (!elimination.remove(object))
+                {
+                    Element<E> newElement = new Element<E>(retVal.value, REMOVE, retVal.priority);
+                    elimination.add(newElement);
+                }
                 return retVal.value;
             }
         }
-*/
-        retVal = pQueue.removeMin();
+
+        do {
+            currentpQueue = pQueue.get();
+            updatedpQueue = new Heap<E>(currentpQueue);
+
+            retVal = updatedpQueue.removeMin();
+        }while (!pQueue.compareAndSet(currentpQueue, updatedpQueue));
+        
         if(retVal == null) return null;
+
         return retVal.value;     
     }
 
@@ -89,15 +110,24 @@ public class ECPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E
         }
         
         public void run(){
-            while (isRunning)
-                for(Element<E> object: elimination) {
+            while (isRunning) {
+                Heap<E> currentpQueue;
+                Heap<E> updatedpQueue;
+                CopyOnWriteArrayList<Element<E>> copiedElimination = new CopyOnWriteArrayList<Element<E>>(elimination);
+                for(Element<E> object: copiedElimination) {
                     if (object.status == REMOVE)
                         elimination.remove(object);
                     else if (object.status == INSERT){
-                        if (pQueue.insert(object))
+                        currentpQueue = pQueue.get();
+                        updatedpQueue = new Heap<E>(currentpQueue);
+
+                        updatedpQueue.insert(object);
+
+                        if (pQueue.compareAndSet(currentpQueue, updatedpQueue))
                             elimination.remove(object);
                     }
                 }
+            }
         }
     }
 }
