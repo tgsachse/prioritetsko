@@ -17,7 +17,7 @@ public class Heap<E extends Comparable<E>>
 
     public Heap(Heap<E> h)
     {
-        minHeap = h.minHeap;
+        minHeap = new ArrayList<Element<E>>(h.minHeap);
     }
 
     // Insert Element by priority into minheap
